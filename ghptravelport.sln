@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ghptravelport", "ghptravelport\ghptravelport.csproj", "{0B69C070-C865-46D3-9B81-4AE6CD145C56}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsService", "ghptravelport\WindowsService.csproj", "{0B69C070-C865-46D3-9B81-4AE6CD145C56}"
 	ProjectSection(ProjectDependencies) = postProject
 		{771DB012-7A19-4E11-B436-61796904C698} = {771DB012-7A19-4E11-B436-61796904C698}
 	EndProjectSection
