@@ -21,8 +21,16 @@ namespace ConsoleApp
                 var provider = new Common.Models.Entities.Provider { ProviderName = "Another Test" };
                 var PNR = new string('a', 10);
 
-                var success = await RestClientService.SendRequest(passenger, cost, provider, PNR);
-                Console.Write(string.Format("API request success: {0}", success));
+                try
+                {
+                    await RestClientService.SendRequest(passenger, cost, provider, PNR);
+                    Console.Write(string.Format("API request success"));
+                }
+                catch (Exception ex)
+                {
+                    Console.Write(string.Format("API request failed"));
+                    Console.Write(ex);
+                }
             }
             else
             {

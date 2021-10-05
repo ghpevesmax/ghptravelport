@@ -10,7 +10,7 @@ namespace Common.Models
         public SegmentType Type { get; set; }
         override public string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             var propertyValues = PropertiesService.GetDynamicPropertyValues(this);
             foreach (var propValue in propertyValues)
             {

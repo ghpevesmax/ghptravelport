@@ -5,7 +5,6 @@ using Common.Models.Entities;
 using Common.Services;
 using Common.Utils;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ namespace Common.Watchers
 {
     public class FileWatcher
     {
-        //private static readonly 
         private readonly Timer Timer;
         public readonly string BasePath = @$"C:\{StringConstants.BrandName}";
         public readonly string StagePath = @$"C:\{StringConstants.BrandName}\{StringConstants.Stage}";
@@ -27,7 +25,17 @@ namespace Common.Watchers
 
         public void AddLogEntry(string line)
         {
+            FileHelper.AddLogEntry($"BasePath:{BasePath} SourcePath:{WorkingPath} FileExtensionToWatch:{FileExtensionToWatch} @{DateTime.Now}", WorkingPath);
             FileHelper.AddLogEntry(line, WorkingPath);
+        }
+        public void AddLogEntry(string line, Exception ex)
+        {
+            FileHelper.AddLogEntry($"BasePath:{BasePath} SourcePath:{WorkingPath} FileExtensionToWatch:{FileExtensionToWatch} @{DateTime.Now}", WorkingPath);
+            FileHelper.AddLogEntry(line, WorkingPath);
+            FileHelper.AddLogEntry(@$"Message: {ex.Message}", WorkingPath);
+            FileHelper.AddLogEntry(@$"InnerException: {ex.InnerException}", WorkingPath);
+            FileHelper.AddLogEntry(@$"StackTrace: {ex.StackTrace}", WorkingPath);
+            FileHelper.AddLogEntry(@$"Type: {ex.GetType()}", WorkingPath);
         }
 
         public FileWatcher(string fileExtension, bool filesToStageFolder = true, double interval = 60000)
@@ -38,13 +46,18 @@ namespace Common.Watchers
             FileExtensionToWatch = fileExtension;
             MoveFilesToStage = filesToStageFolder;
             EnsureWorkingPathsExist();
-            AddLogEntry($"BasePath:{BasePath} SourcePath:{WorkingPath} FileExtensionToWatch:{FileExtensionToWatch} @{DateTime.Now} ");
         }
 
         private async void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            AddLogEntry("Timer Elapsed - " + DateTime.Now.ToString());
-            await WatchSourcePath();
+            try
+            {
+                await WatchSourcePath();
+            }
+            catch (Exception ex)
+            {
+                AddLogEntry($"Exception @{DateTime.Now} ", ex);
+            }
         }
 
         private async Task WatchSourcePath()
@@ -54,20 +67,20 @@ namespace Common.Watchers
 
             if (MoveFilesToStage)
             {
-                AddLogEntry("MoveFilesToStage - " + DateTime.Now.ToString());
                 foreach (var file in sourceFiles.Where(sf => !sf.FullName.Contains(StringConstants.DupFileExtension)))
                 {
-                    AddLogEntry($"MoveFilesToStage:{file.FullName} @{DateTime.Now} ");
                     var fileDestName = $@"{WorkingPath}\{StringConstants.Stage}\{file.Name.AddStageExtension()}";
                     if (File.Exists(fileDestName))
                     {
-                        Directory.Move(file.FullName, file.FullName.AddDupExtension());
+                        fileDestName = file.FullName.AddDupExtension();
+                        Directory.Move(file.FullName, fileDestName);
                     }
                     else
                     {
                         Directory.Move(file.FullName, fileDestName);
                     }
-                } 
+                    AddLogEntry($"MoveFilesToStage:{fileDestName} @{DateTime.Now}");
+                }
             }
             else
             {
@@ -101,14 +114,15 @@ namespace Common.Watchers
                             ProviderName = headerSegment.T50ISS.Trim()
                         };
 
-                        var success = await RestClientService.SendRequest(passenger, cost, provider, PNR);
-                        if(success)
+                        try
                         {
+                            await RestClientService.SendRequest(passenger, cost, provider, PNR);
                             FileHelper.MoveFileToProcessed(sourceFileFullName);
                         }
-                        else
+                        catch (Exception)
                         {
                             FileHelper.MoveFileToApiError(sourceFileFullName);
+                            throw;
                         }
                     }
 
@@ -120,28 +134,21 @@ namespace Common.Watchers
         {
             try
             {
-                AddLogEntry($"EnsureWorkingPathsExist SourcePath:{BasePath} @{DateTime.Now} ");
                 if (!Directory.Exists(BasePath))
                 {
-                    AddLogEntry($"CreateDirectory: @{DateTime.Now} ");
+                    AddLogEntry($"CreatedDirectory SourcePath:{BasePath} @{DateTime.Now} ");
                     Directory.CreateDirectory(BasePath);
                 }
 
-                AddLogEntry($"EnsureWorkingPathsExist SourcePath:{StagePath} @{DateTime.Now} ");
                 if (!Directory.Exists(StagePath))
                 {
-                    AddLogEntry($"CreateDirectory: @{DateTime.Now} ");
+                    AddLogEntry($"CreatedDirectory SourcePath:{StagePath} @{DateTime.Now} ");
                     Directory.CreateDirectory(StagePath);
                 }
             }
             catch (Exception ex)
             {
-                AddLogEntry($"MoveFilesToStage:Exception @{DateTime.Now} ");
-                AddLogEntry(@$"Message: {ex.Message}");
-                AddLogEntry(@$"InnerException: {ex.InnerException}");
-                AddLogEntry(@$"StackTrace: {ex.StackTrace}");
-                AddLogEntry(@$"Type: {ex.GetType()}");
-                throw;
+                AddLogEntry($"MoveFilesToStage:Exception @{DateTime.Now} ", ex);
             }
         }
 
