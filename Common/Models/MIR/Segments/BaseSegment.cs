@@ -1,4 +1,5 @@
 ﻿using Common.Lookups;
+using Common.Services;
 using System;
 using System.Text;
 
@@ -10,7 +11,7 @@ namespace Common.Models
         override public string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            var propertyValues = Services.PropertiesService.GetDynamicPropertyValues(this);
+            var propertyValues = PropertiesService.GetDynamicPropertyValues(this);
             foreach (var propValue in propertyValues)
             {
                 var propVal = propValue.Name == "Type" ? Enum.GetName(typeof(SegmentType), propValue.Value) : (string)propValue.Value;
