@@ -1,10 +1,17 @@
 ﻿using Common.Utils;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Common.Helpers
 {
     public static class FileHelper
     {
+        public static void AddLogEntry(string line, string workingPath)
+        {
+            var lines = new List<string> { line };
+            File.AppendAllLines(@$"{workingPath}\Log.txt", lines);
+        }
+
         public static string MoveFileToApiError(string sourceFileFullName)
         {
             string newFileFullName;
