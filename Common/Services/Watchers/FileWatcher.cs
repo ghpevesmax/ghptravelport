@@ -25,10 +25,9 @@ namespace Common.Watchers
         public string FileExtensionToWatch { get; set; }
         public bool MoveFilesToStage { get; set; }
 
-        public static void AddLogEntry(string line)
+        public void AddLogEntry(string line)
         {
-            var lines = new List<string> { line };
-            File.AppendAllLines(@$"C:\ghptravelport\Log.txt", lines);
+            FileHelper.AddLogEntry(line, WorkingPath);
         }
 
         public static void AddLogRestEntry(string line)

@@ -1,4 +1,5 @@
-﻿using Common.Utils;
+﻿using Common.Helpers;
+using Common.Utils;
 using Common.Watchers;
 using System;
 using System.IO;
@@ -10,9 +11,9 @@ namespace FileWatcherService
     {
         static void Main(string[] args)
         {
+            var workingDir = @"C:\ghptravelport";
             try
             {
-                var workingDir = @"C:\ghptravelport";
                 if (!Directory.Exists(workingDir))
                 {
                     Directory.CreateDirectory(workingDir);
@@ -21,10 +22,10 @@ namespace FileWatcherService
             }
             catch (Exception ex)
             {
-                FileWatcher.AddLogEntry(@$"Message: {ex.Message}");
-                FileWatcher.AddLogEntry(@$"Message: {ex.InnerException}");
-                FileWatcher.AddLogEntry(@$"Message: {ex.StackTrace}");
-                FileWatcher.AddLogEntry(@$"Message: {ex.GetType()}");
+                FileHelper.AddLogEntry(@$"Message: {ex.Message}", workingDir);
+                FileHelper.AddLogEntry(@$"Message: {ex.InnerException}", workingDir);
+                FileHelper.AddLogEntry(@$"Message: {ex.StackTrace}", workingDir);
+                FileHelper.AddLogEntry(@$"Message: {ex.GetType()}", workingDir);
                 throw;
             }
 
