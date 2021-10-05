@@ -13,27 +13,18 @@ namespace Common.Services
     public static class RestClientService
     {
         public static readonly string ServiceUrl = "http://apitravel.miagenciaghp.com/api";
-        //public static readonly string ServiceUrl = "http://127.0.0.1:8000/api";
 
-        public static async Task<bool> SendRequest(Passenger passenger, Cost cost, Provider provider, string PNR)
+        public static async Task SendRequest(Passenger passenger, Cost cost, Provider provider, string PNR)
         {
-            try
+            await PostRecords(new AddRecordRequest
             {
-                await PostRecords(new AddRecordRequest
-                {
-                    Titular = passenger.PassengerName,
-                    Cliente = passenger.PassengerName,
-                    Clave = PNR,
-                    Proveedor = provider.ProviderName,
-                    Total = cost.Total,
-                    IVA = cost.PrimaryTaxAmount
-                });
-            }
-            catch (ApiException ex)
-            {
-                return false;
-            }
-            return true;
+                Titular = passenger.PassengerName,
+                Cliente = passenger.PassengerName,
+                Clave = PNR,
+                Proveedor = provider.ProviderName,
+                Total = cost.Total,
+                IVA = cost.PrimaryTaxAmount
+            });
         }
 
         private static async Task PostRecords(AddRecordRequest request)
@@ -53,16 +44,7 @@ namespace Common.Services
                     })
                 }
             );
-
-            try
-            {
-                await api.PostRecord(request);
-            }
-            catch (System.Exception ex)
-            {
-
-                throw;
-            }
+            await api.PostRecord(request);
         }
     }
 }
