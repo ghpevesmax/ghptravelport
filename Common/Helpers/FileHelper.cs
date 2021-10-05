@@ -1,4 +1,5 @@
 ﻿using Common.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -9,7 +10,7 @@ namespace Common.Helpers
         public static void AddLogEntry(string line, string workingPath)
         {
             var lines = new List<string> { line };
-            File.AppendAllLines(@$"{workingPath}\Log.txt", lines);
+            File.AppendAllLines(@$"{workingPath}\Log-{DateTime.Now.ToShortDateString()}.txt", lines);
         }
 
         public static string MoveFileToApiError(string sourceFileFullName)

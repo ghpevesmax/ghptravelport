@@ -30,12 +30,6 @@ namespace Common.Watchers
             FileHelper.AddLogEntry(line, WorkingPath);
         }
 
-        public static void AddLogRestEntry(string line)
-        {
-            var lines = new List<string> { line };
-            File.AppendAllLines(@$"C:\ghptravelport\stage\LogRest.txt", lines);
-        }
-
         public FileWatcher(string fileExtension, bool filesToStageFolder = true, double interval = 60000)
         {
             Timer = new Timer(interval) { AutoReset = true };
