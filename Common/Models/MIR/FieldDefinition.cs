@@ -18,5 +18,7 @@ namespace Common.Models
         /// Defines whether or not this field can be present or not.
         /// </summary>
         public bool IsOptionalField { get; set; }
+        public string OptionalCodeId { get; set; }
+        public bool HasOptionalCodeId => !string.IsNullOrEmpty(OptionalCodeId);
     }
 }
