@@ -10,7 +10,7 @@ namespace Common.Helpers
         public static void AddLogEntry(string line, string workingPath)
         {
             var lines = new List<string> { line };
-            File.AppendAllLines(@$"{workingPath}\Log-{DateTime.Now.ToShortDateString()}.txt", lines);
+            File.AppendAllLines(@$"{workingPath}\Log-{DateTime.Now.ToShortDateString().Replace('/','-')}.txt", lines);
         }
 
         public static string MoveFileToApiError(string sourceFileFullName)
