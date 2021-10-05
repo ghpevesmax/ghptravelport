@@ -11,7 +11,14 @@ namespace Common.Services
     {
         public static IEnumerable<string> GetLinesFromFile(string fileName)
         {
-            return File.ReadLines(fileName);
+            if (File.Exists(fileName))
+            {
+                return File.ReadLines(fileName); 
+            }
+            else
+            {
+                return Enumerable.Empty<string>();
+            }
         }
 
         public static List<RawSegment> BuildFileSegments(IEnumerable<string> lines)
@@ -61,7 +68,8 @@ namespace Common.Services
                                          break;
             }
             // Adding pipes to remove carriage returns.
-            var segmentLines = lines.Skip(currentLine).Take(lineBreakOcurrences).Aggregate((startLine, nextLine) => string.Format("{0}|{1}", startLine, nextLine));
+            var segmentLines = lines.Skip(currentLine).Take(lineBreakOcurrences)
+                .Aggregate((startLine, nextLine) => string.Format("{0}|{1}", startLine, nextLine));
 
             return new SegmentControl {
                 LineSegment = new RawSegment {
