@@ -4,8 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3BF8AC9F-703A-44CE-8EC4-CA302EC20BC5}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileToStageWatcherService", "FileWatcherService\FileWatcherService.csproj", "{8B690546-BFD9-42F2-9892-400957F5C15B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileWatcherService", "FileWatcherService\FileWatcherService.csproj", "{8B690546-BFD9-42F2-9892-400957F5C15B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileToRestService", "FileToRestService\FileToRestService.csproj", "{419A0EA5-CC0A-4F29-A45D-5F8BF1C2D96D}"
 EndProject
