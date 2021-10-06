@@ -1,22 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Common.Models;
-using Common.Services;
+﻿using Common.Services;
+using System;
+using System.Text;
+using System.Threading.Tasks;
+using TextCopy;
 
 namespace ConsoleApp
 {
     class Program
     {
-        public string FileName => "ATD_AX_GAL.MIR";
+        public static string FileName => "ATD_AX_GAL.MIR";
+        public static bool IsApiTest => true;
 
-        static void Main(string[] args)
+        [STAThread]
+        static async Task Main(string[] args)
         {
-            var lines = FileProcessor.GetLinesFromFile("ATD_AX_GAL.MIR");
-            var segmentList = FileProcessor.BuildFileSegments(lines);
-            var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
-            foreach(var segment in MIRSegments)
-                Console.Write(segment.ToString());
+            if (IsApiTest)
+            {
+                var passenger = new Common.Models.Entities.Passenger { PassengerName = "Test" };
+                var cost = new Common.Models.Entities.Cost { Total = 1000, PrimaryTaxAmount = 160 };
+                var provider = new Common.Models.Entities.Provider { ProviderName = "Another Test" };
+                var PNR = new string('a', 10);
+
+                try
+                {
+                    await RestClientService.SendRequest(passenger, cost, provider, PNR);
+                    Console.Write(string.Format("API request success"));
+                }
+                catch (Exception ex)
+                {
+                    Console.Write(string.Format("API request failed"));
+                    Console.Write(ex);
+                }
+            }
+            else
+            {
+                var lines = FileProcessor.GetLinesFromFile(FileName);
+                var segmentList = FileProcessor.BuildFileSegments(lines);
+                var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
+                var clipboard = new StringBuilder();
+                foreach (var segment in MIRSegments)
+                {
+                    clipboard.AppendLine(segment.ToString());
+                    Console.Write(segment.ToString());
+                }
+                ClipboardService.SetText(clipboard.ToString());
+                Console.Write(Environment.SystemDirectory); 
+            }
             Console.ReadLine();
         }
     }

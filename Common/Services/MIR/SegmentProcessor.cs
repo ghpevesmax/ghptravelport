@@ -40,22 +40,44 @@ namespace Common.Services
                                          break;
             }
 
+            var previousSegmentPropIsNotPresent = false;
             var rawSegmentLastPosition = 0;
             var segmentProperties = PropertiesService.GetDynamicProperties(segmentInstance);
             var segmentDMLPropertyValues = PropertiesService.GetDynamicPropertyValues(segmentTypeDefinition);
             foreach(var segmentProperty in segmentProperties)
             {
+                if(previousSegmentPropIsNotPresent)
+                {
+                    previousSegmentPropIsNotPresent = false;
+                    continue;
+                }
+
                 var segmentDMLPropertyValue = segmentDMLPropertyValues.FirstOrDefault(pv => pv.Name == segmentProperty.Name);
                 if (segmentDMLPropertyValue != null)
                 {
                     var segmentPropValue = "";
                     var fieldDefinition = segmentDMLPropertyValue.Value as FieldDefinition;
+
                     var rawSegmentStartPosition = fieldDefinition.IsOptionalField ? rawSegmentLastPosition : fieldDefinition.SegmentPosition;
                     rawSegmentLastPosition = rawSegmentStartPosition + fieldDefinition.Length;
 
                     if (rawSegment.Length >= rawSegmentLastPosition)
                     {
-                        segmentPropValue = rawSegment.Substring(rawSegmentStartPosition, fieldDefinition.Length);
+                        var propValue = rawSegment.Substring(rawSegmentStartPosition, fieldDefinition.Length);
+                        if(fieldDefinition.IsOptionalField)
+                        {
+                            if (fieldDefinition.HasOptionalCodeId)
+                            {
+                                if (string.IsNullOrEmpty(fieldDefinition.OptionalCodeId) || propValue != fieldDefinition.OptionalCodeId)
+                                {
+                                    rawSegmentLastPosition = rawSegmentStartPosition;
+                                    previousSegmentPropIsNotPresent = true;
+                                    continue;
+                                } 
+                            }
+                        }
+
+                        segmentPropValue = propValue;
                         if (segmentProperty.CanWrite)
                             PropertiesService.SetPropertyValue(segmentInstance, segmentProperty.Name, segmentPropValue);
                     }
