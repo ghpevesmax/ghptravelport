@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Common.Models.Entities
+namespace Common.Models
 {
     class ApiHandler : DelegatingHandler
     {

@@ -1,4 +1,4 @@
-﻿namespace Common.Models.Entities
+﻿namespace Common.Models
 {
     public class AddRecordRequest
     {
@@ -20,5 +20,6 @@
         //[JsonProperty(PropertyName="iva")]
         public double IVA { get; set; }
 
+        public string UID { get; set; }
     }
 }
