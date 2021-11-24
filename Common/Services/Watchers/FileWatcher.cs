@@ -79,7 +79,7 @@ namespace Common.Watchers
                     {
                         Directory.Move(file.FullName, fileDestName);
                     }
-                    AddLogEntry($"MoveFilesToStage:{fileDestName} @{DateTime.Now}");
+                    AddLogEntry($"MoveFilesToStage: {fileDestName} @{DateTime.Now}");
                 }
             }
             else

@@ -1,11 +1,12 @@
-﻿using Common.Models.Entities;
-using Common.Services.API.Models;
+﻿using Common.Helpers;
+using Common.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Refit;
 using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Common.Services
@@ -13,10 +14,13 @@ namespace Common.Services
     public static class RestClientService
     {
         public static readonly string ServiceUrl = "http://apitravel.miagenciaghp.com/api";
+        //public static readonly string ServiceUrl = "http://localhost:8000/api";
 
         public static async Task SendRequest(Passenger passenger, Cost cost, Provider provider, string PNR)
         {
-            await PostRecords(new AddRecordRequest
+            var restClient = GetRestClient();
+            var authResource = await AuthService.GetAuthResourceData(restClient);
+            await PostRecord(restClient, authResource, new AddRecordRequest
             {
                 Titular = passenger.PassengerName,
                 Cliente = passenger.PassengerName,
@@ -27,9 +31,18 @@ namespace Common.Services
             });
         }
 
-        private static async Task PostRecords(AddRecordRequest request)
+        private static async Task PostRecord(
+            IGHPTravelportClient restClient,
+            AuthResource authResource,
+            AddRecordRequest request)
         {
-            var api = RestService.For<IGHPTravelportClient>(
+            request.UID = authResource.Uid;
+            await restClient.PostRecord(authResource.ToString(), request);
+        }
+
+        private static IGHPTravelportClient GetRestClient()
+        {
+            return RestService.For<IGHPTravelportClient>(
                 new HttpClient(new ApiHandler())
                 {
                     BaseAddress = new Uri(ServiceUrl)
@@ -44,7 +57,6 @@ namespace Common.Services
                     })
                 }
             );
-            await api.PostRecord(request);
         }
     }
 }
