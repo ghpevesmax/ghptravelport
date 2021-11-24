@@ -13,7 +13,7 @@ namespace Common.Models
         Task PostRecord([Header("Authorization")] string auth, [Body] AddRecordRequest request);
 
         [Post("/auth")]
-        Task<AuthResponse> Authorize([Body(buffered: true)] UidModel request);
+        Task<string> Authorize([Body] string uid);
 
         [Get("/auth/launch/{publicIpAddress}")]
         Task<AuthResource> FirstLaunch(string publicIpAddress);
