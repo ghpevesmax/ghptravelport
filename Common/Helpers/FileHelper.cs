@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Common.Helpers
 {
@@ -94,6 +96,53 @@ namespace Common.Helpers
                 Directory.Move(sourceFileFullName, newFileFullName);
             }
             return newFileFullName;
+        }
+
+        public static IEnumerable<string> GetLinesFromFile(string fileName)
+        {
+            if (File.Exists(fileName))
+            {
+                return File.ReadLines(fileName);
+            }
+            else
+            {
+                return Enumerable.Empty<string>();
+            }
+        }
+
+        public static Models.AuthResource GetAuthResources()
+        {
+            if (!AuthFileExists())
+            {
+                return null;
+            }
+
+            var lines = GetLinesFromFile(StringConstants.ResourceFileNamePath);
+            if (!lines.Any())
+            {
+                return null;
+            }
+
+            return new Models.AuthResource
+            {
+                Uid = lines.FirstOrDefault(),
+                Token = lines.LastOrDefault()
+            };
+        }
+
+        public static bool AuthFileExists()
+        {
+            return File.Exists(StringConstants.ResourceFileNamePath);
+        }
+
+        public static async Task SetAuthResourceAsync(Models.AuthResource authResource)
+        {
+            if (AuthFileExists())
+            {
+                File.Delete(@$"{StringConstants.ResourceFileNamePath}"); 
+            }
+            var lines = new string[] { authResource.Uid, authResource.Token };
+            await File.AppendAllLinesAsync(@$"{StringConstants.ResourceFileNamePath}", lines);
         }
     }
 }
