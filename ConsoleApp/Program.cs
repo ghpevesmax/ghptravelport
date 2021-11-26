@@ -1,5 +1,11 @@
-﻿using Common.Services;
+﻿using Common.Helpers;
+using Common.Models;
+using Common.Services;
+using Refit;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using TextCopy;
@@ -16,25 +22,43 @@ namespace ConsoleApp
         {
             if (IsApiTest)
             {
-                var passenger = new Common.Models.Entities.Passenger { PassengerName = "Test" };
-                var cost = new Common.Models.Entities.Cost { Total = 1000, PrimaryTaxAmount = 160 };
-                var provider = new Common.Models.Entities.Provider { ProviderName = "Another Test" };
+                var passenger = new Passenger { PassengerName = "Test" };
+                var cost = new Cost { Total = 1000, PrimaryTaxAmount = 160 };
+                var provider = new Provider { ProviderName = "Another Test" };
                 var PNR = new string('a', 10);
 
                 try
                 {
+                    var publicIpAddress = await NetworkHelper.GetPublicIpAddress();
+                    Console.WriteLine($"Public IP request {publicIpAddress}");
                     await RestClientService.SendRequest(passenger, cost, provider, PNR);
-                    Console.Write(string.Format("API request success"));
+                    Console.WriteLine("API request success");
                 }
-                catch (Exception ex)
+                catch(HttpRequestException ex)
                 {
-                    Console.Write(string.Format("API request failed"));
-                    Console.Write(ex);
+                    Console.WriteLine($"Could not connect to service on { RestClientService.ServiceUrl }");
+                    Console.WriteLine("Original exception:\n\n" + ex);
+
+                }
+                catch (ApiException ex)
+                {
+                    Console.WriteLine("API request failed");
+                    if(!new System.Net.HttpStatusCode[] { System.Net.HttpStatusCode.NotFound, System.Net.HttpStatusCode.Unauthorized }.Contains(ex.StatusCode))
+                    {
+                        // Extract the details of the error
+                        var errors = await ex.GetContentAsAsync<Dictionary<string, string>>();
+                        // Combine the errors into a string
+                        var message = string.Join("; ", errors.Values);
+                        // Throw a normal exception
+                        //throw new Exception(message);
+                        Console.WriteLine("Message:\n" + message);
+                    }
+                    Console.WriteLine("Original exception:\n" + ex);
                 }
             }
             else
             {
-                var lines = FileProcessor.GetLinesFromFile(FileName);
+                var lines = FileHelper.GetLinesFromFile(FileName);
                 var segmentList = FileProcessor.BuildFileSegments(lines);
                 var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
                 var clipboard = new StringBuilder();

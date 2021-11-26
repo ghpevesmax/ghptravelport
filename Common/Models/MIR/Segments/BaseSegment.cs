@@ -15,7 +15,7 @@ namespace Common.Models
             foreach (var propValue in propertyValues)
             {
                 var propVal = propValue.Name == "Type" ? Enum.GetName(typeof(SegmentType), propValue.Value) : (string)propValue.Value;
-                sb.AppendLine(string.Format("{0}: {1}", propValue.Name, propVal));
+                sb.AppendLine($"{propValue.Name}: {propVal}");
             }
             return sb.ToString();
         }

@@ -1,7 +1,6 @@
 ﻿using Common.Helpers;
 using Common.Lookups;
 using Common.Models;
-using Common.Models.Entities;
 using Common.Services;
 using Common.Utils;
 using System;
@@ -79,7 +78,7 @@ namespace Common.Watchers
                     {
                         Directory.Move(file.FullName, fileDestName);
                     }
-                    AddLogEntry($"MoveFilesToStage:{fileDestName} @{DateTime.Now}");
+                    AddLogEntry($"MoveFilesToStage: {fileDestName} @{DateTime.Now}");
                 }
             }
             else
@@ -89,7 +88,7 @@ namespace Common.Watchers
                 {
                     var sourceFileFullName = FileHelper.MoveFileToProcess(sourceFile.FullName);
 
-                    var lines = FileProcessor.GetLinesFromFile(sourceFileFullName);
+                    var lines = FileHelper.GetLinesFromFile(sourceFileFullName);
                     if (lines.Any())
                     {
                         var segmentList = FileProcessor.BuildFileSegments(lines);

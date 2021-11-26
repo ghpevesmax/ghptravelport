@@ -9,18 +9,6 @@ namespace Common.Services
 {
     public class FileProcessor
     {
-        public static IEnumerable<string> GetLinesFromFile(string fileName)
-        {
-            if (File.Exists(fileName))
-            {
-                return File.ReadLines(fileName); 
-            }
-            else
-            {
-                return Enumerable.Empty<string>();
-            }
-        }
-
         public static List<RawSegment> BuildFileSegments(IEnumerable<string> lines)
         {
             var segmentsList = new List<RawSegment>();
@@ -69,7 +57,7 @@ namespace Common.Services
             }
             // Adding pipes to remove carriage returns.
             var segmentLines = lines.Skip(currentLine).Take(lineBreakOcurrences)
-                .Aggregate((startLine, nextLine) => string.Format("{0}|{1}", startLine, nextLine));
+                .Aggregate((startLine, nextLine) => $"{startLine}|{nextLine}");
 
             return new SegmentControl {
                 LineSegment = new RawSegment {
