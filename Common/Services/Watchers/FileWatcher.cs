@@ -15,7 +15,6 @@ namespace Common.Watchers
     {
         private readonly Timer Timer;
         public readonly string BasePath = @$"C:\{StringConstants.BrandName}";
-        public readonly string DistPath = @$"C:\{StringConstants.BrandName}\{StringConstants.Dist}";
         public readonly string StagePath = @$"C:\{StringConstants.BrandName}\{StringConstants.Stage}";
 
 
