@@ -26,6 +26,18 @@ Open a command prompt (**as Administrator**) in the path `C:\ghptravelport\dist\
 
 Once the following commands run both services have been installed and ready to consume .MIR files and sending to the *MiAgencia* app.
 
+### Uninstall
+Open a command prompt (**as Administrator**) in the path `C:\ghptravelport\dist\FileWatcher` and write the following command:
+- `FileWatcherService.exe uninstall`
+
+
+Open a command prompt (**as Administrator**) in the path `C:\ghptravelport\dist\RestWatcher` and write the following command:
+- `FileToRestService.exe.exe uninstall`
+
+
+
+__Important__: `dist` folder should not be removed in order to still using `install` & `uninstall` commands.
+
 ## Usage
 
 GhpTravelport services will create the required working directories to succesfully process .MIR files. To let the services process your files, make sure you move every .MIR file into the `C:\ghptravelport` folder.
