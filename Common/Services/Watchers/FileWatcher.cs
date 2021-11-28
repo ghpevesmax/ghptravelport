@@ -97,6 +97,7 @@ namespace Common.Watchers
                         var headerSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.Header) as HeaderSegment;
                         var passengerSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.Passenger) as PassengerSegment;
                         var taxSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.FareValue) as FareValueSegment;
+                        var a14FTSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.A14FT) as A14FTSegment;
 
                         var PNR = headerSegment.T50RCL.Trim();
                         var passenger = new Passenger

@@ -6,6 +6,8 @@
         Header = 0,
         CustomerRemarks = 1,
         Passenger = 3,
-        FareValue = 4
+        FareValue = 4,
+        A14FT = 5,
+        A14VL = 6,
     }
 }
