@@ -18,21 +18,13 @@ namespace Common.Services
                 while (currentLine < lines.Count())
                 {
                     var line = lines.ElementAt(currentLine);
-                    SegmentType segmentType = SegmentType.None;
-                    if (line.StartsWith("T5"))
-                        segmentType = SegmentType.Header;
-                    if (line.StartsWith("A00"))
-                        segmentType = SegmentType.CustomerRemarks;
-                    if (line.StartsWith("A02"))
-                        segmentType = SegmentType.Passenger;
-                    if (line.StartsWith("A07"))
-                        segmentType = SegmentType.FareValue;
+                    var segmentType = SegmentProcessor.GetSegmentType(line);
 
                     if (segmentType != SegmentType.None)
                     {
                         var segmentControl = BuildSegment(lines, segmentType, currentLine);
                         segmentsList.Add(segmentControl.LineSegment);
-                        currentLine += segmentControl.LineBreaks;
+                        currentLine += segmentControl.LineBreaks > 0 ? segmentControl.LineBreaks : 1;
                     }
                     else
                         currentLine++;
@@ -55,9 +47,13 @@ namespace Common.Services
                 case SegmentType.FareValue: lineBreakOcurrences = FareValueFieldDefinition.CarriageReturnNumber;
                                          break;
             }
-            // Adding pipes to remove carriage returns.
-            var segmentLines = lines.Skip(currentLine).Take(lineBreakOcurrences)
-                .Aggregate((startLine, nextLine) => $"{startLine}|{nextLine}");
+            var segmentLines = lines.ElementAt(currentLine);
+            if (lineBreakOcurrences > 0)
+            {
+                // Adding pipes to remove carriage returns.
+                segmentLines = lines.Skip(currentLine).Take(lineBreakOcurrences)
+                    .Aggregate((startLine, nextLine) => $"{startLine}|{nextLine}"); 
+            }
 
             return new SegmentControl {
                 LineSegment = new RawSegment {
