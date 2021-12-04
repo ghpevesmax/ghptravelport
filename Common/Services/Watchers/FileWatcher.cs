@@ -104,19 +104,29 @@ namespace Common.Watchers
                         {
                             PassengerName = passengerSegment.A02NME.Trim()
                         };
+
                         var cost = new Cost
                         {
                             Total = Convert.ToDouble(taxSegment.A07TTA.Trim()),
                             PrimaryTaxAmount = Convert.ToDouble(taxSegment.A07TT1.Trim())
                         };
+
                         var provider = new Provider
                         {
                             ProviderName = headerSegment.T50ISS.Trim()
                         };
 
+                        var a14FT = new A14FT()
+                        {
+                            IdCliente = Convert.ToInt32(a14FTSegment.IdCliente.Trim()),
+                            Concepto = a14FTSegment.Concepto.Trim(),
+                            CargoPorServicio = Convert.ToDouble(a14FTSegment.CargoPorServicio.Trim()),
+                            IdUsuario = Convert.ToInt32(a14FTSegment.IdUsuario.Trim()),
+                        };
+
                         try
                         {
-                            await RestClientService.SendRequest(passenger, cost, provider, PNR);
+                            await RestClientService.SendRequest(passenger, cost, provider, PNR, a14FT);
                             FileHelper.MoveFileToProcessed(sourceFileFullName);
                         }
                         catch (Exception)

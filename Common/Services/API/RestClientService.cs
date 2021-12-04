@@ -16,7 +16,7 @@ namespace Common.Services
         public static readonly string ServiceUrl = "http://apitravel.miagenciaghp.com/api";
         //public static readonly string ServiceUrl = "http://localhost:8000/api";
 
-        public static async Task SendRequest(Passenger passenger, Cost cost, Provider provider, string PNR)
+        public static async Task SendRequest(Passenger passenger, Cost cost, Provider provider, string PNR, A14FT a14FT = null)
         {
             var restClient = GetRestClient();
             var authResource = await AuthService.GetAuthResourceData(restClient);
@@ -27,7 +27,11 @@ namespace Common.Services
                 Clave = PNR,
                 Proveedor = provider.ProviderName,
                 Total = cost.Total,
-                IVA = cost.PrimaryTaxAmount
+                IVA = cost.PrimaryTaxAmount,
+                IdCliente = a14FT.IdCliente,
+                Concepto = a14FT.Concepto,
+                CargoPorServicio = a14FT.CargoPorServicio,
+                IdUsuario = a14FT.IdUsuario,
             });
         }
 
