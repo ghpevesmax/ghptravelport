@@ -161,11 +161,6 @@ namespace Common.Services
                 segmentType = SegmentType.A14FT;
             }
 
-            if (line.StartsWith("A14VL"))
-            {
-                segmentType = SegmentType.A14VL;
-            }
-
             return segmentType;
         }
     }

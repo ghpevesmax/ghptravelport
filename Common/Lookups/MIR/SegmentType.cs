@@ -8,6 +8,5 @@
         Passenger = 3,
         FareValue = 4,
         A14FT = 5,
-        A14VL = 6,
     }
 }
