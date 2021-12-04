@@ -3,7 +3,7 @@
     public class AddRecordRequest
     {
         //[JsonProperty(PropertyName="cliente")]
-        public string Cliente { get; set; }
+        public string Pasajero { get; set; }
 
         //[JsonProperty(PropertyName="proveedor")]
         public string Proveedor { get; set; }

@@ -23,7 +23,7 @@ namespace Common.Services
             await PostRecord(restClient, authResource, new AddRecordRequest
             {
                 Titular = passenger.PassengerName,
-                Cliente = passenger.PassengerName,
+                Pasajero = passenger.PassengerName,
                 Clave = PNR,
                 Proveedor = provider.ProviderName,
                 Total = cost.Total,
