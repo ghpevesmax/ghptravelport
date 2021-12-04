@@ -16,6 +16,7 @@ namespace ConsoleApp
     {
         public static string FileName => @"C:\ghptravelport\stage\AAADEGAL.MIR.processed";
         public static bool IsApiTest => false;
+        public static bool IsA14FTTest => true;
 
         [STAThread]
         static async Task Main(string[] args)
@@ -63,7 +64,14 @@ namespace ConsoleApp
                 var segmentList = FileProcessor.BuildFileSegments(lines);
                 var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
                 var clipboard = new StringBuilder();
-                foreach (var segment in MIRSegments.Where(_ => _ != null && _.Type == Common.Lookups.SegmentType.A14FT))
+                if(IsA14FTTest)
+                {
+                    MIRSegments = MIRSegments
+                        .Where(_ => _ != null && _.Type == Common.Lookups.SegmentType.A14FT)
+                        .ToList();
+                }
+
+                foreach (var segment in MIRSegments)
                 {
                     clipboard.AppendLine(segment.ToString());
                     Console.Write(segment.ToString());
