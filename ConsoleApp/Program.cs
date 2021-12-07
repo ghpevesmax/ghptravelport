@@ -14,12 +14,14 @@ namespace ConsoleApp
 {
     class Program
     {
-        public static string FileName => "ATD_AX_GAL.MIR";
-        public static bool IsApiTest => true;
+        public static string FileName => @"C:\ghptravelport\stage\AAADEGAL.MIR.processed";
+        public static bool IsApiTest => false;
+        public static bool IsA14FTTest => true;
 
         [STAThread]
         static async Task Main(string[] args)
         {
+            Console.WriteLine(Environment.CurrentDirectory);
             if (IsApiTest)
             {
                 var passenger = new Passenger { PassengerName = "Test" };
@@ -62,13 +64,19 @@ namespace ConsoleApp
                 var segmentList = FileProcessor.BuildFileSegments(lines);
                 var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
                 var clipboard = new StringBuilder();
+                if(IsA14FTTest)
+                {
+                    MIRSegments = MIRSegments
+                        .Where(_ => _ != null && _.Type == Common.Lookups.SegmentType.A14FT)
+                        .ToList();
+                }
+
                 foreach (var segment in MIRSegments)
                 {
                     clipboard.AppendLine(segment.ToString());
                     Console.Write(segment.ToString());
                 }
                 ClipboardService.SetText(clipboard.ToString());
-                Console.Write(Environment.SystemDirectory); 
             }
             Console.ReadLine();
         }

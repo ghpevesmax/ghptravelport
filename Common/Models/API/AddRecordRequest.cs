@@ -3,7 +3,7 @@
     public class AddRecordRequest
     {
         //[JsonProperty(PropertyName="cliente")]
-        public string Cliente { get; set; }
+        public string Pasajero { get; set; }
 
         //[JsonProperty(PropertyName="proveedor")]
         public string Proveedor { get; set; }
@@ -21,5 +21,10 @@
         public double IVA { get; set; }
 
         public string UID { get; set; }
+
+        public int IdCliente { get; set; }
+        public string Concepto { get; set; }
+        public double CargoPorServicio { get; set; }
+        public int IdUsuario { get; set; }
     }
 }

@@ -97,25 +97,36 @@ namespace Common.Watchers
                         var headerSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.Header) as HeaderSegment;
                         var passengerSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.Passenger) as PassengerSegment;
                         var taxSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.FareValue) as FareValueSegment;
+                        var a14FTSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.A14FT) as A14FTSegment;
 
                         var PNR = headerSegment.T50RCL.Trim();
                         var passenger = new Passenger
                         {
                             PassengerName = passengerSegment.A02NME.Trim()
                         };
+
                         var cost = new Cost
                         {
                             Total = Convert.ToDouble(taxSegment.A07TTA.Trim()),
                             PrimaryTaxAmount = Convert.ToDouble(taxSegment.A07TT1.Trim())
                         };
+
                         var provider = new Provider
                         {
                             ProviderName = headerSegment.T50ISS.Trim()
                         };
 
+                        var a14FT = new A14FT()
+                        {
+                            IdCliente = Convert.ToInt32(a14FTSegment.IdCliente.Trim()),
+                            Concepto = a14FTSegment.Concepto.Trim(),
+                            CargoPorServicio = Convert.ToDouble(a14FTSegment.CargoPorServicio.Trim()),
+                            IdUsuario = Convert.ToInt32(a14FTSegment.IdUsuario.Trim()),
+                        };
+
                         try
                         {
-                            await RestClientService.SendRequest(passenger, cost, provider, PNR);
+                            await RestClientService.SendRequest(passenger, cost, provider, PNR, a14FT);
                             FileHelper.MoveFileToProcessed(sourceFileFullName);
                         }
                         catch (Exception)
