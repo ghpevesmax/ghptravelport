@@ -20,7 +20,7 @@ namespace Common.Services
         {
             var restClient = GetRestClient();
             var authResource = await AuthService.GetAuthResourceData(restClient);
-            await PostRecord(restClient, authResource, new AddRecordRequest
+            var addRecordRequest = new AddRecordRequest
             {
                 Titular = passenger.PassengerName,
                 Pasajero = passenger.PassengerName,
@@ -32,7 +32,9 @@ namespace Common.Services
                 Concepto = a14FT.Concepto,
                 CargoPorServicio = a14FT.CargoPorServicio,
                 IdUsuario = a14FT.IdUsuario,
-            });
+            };
+
+            await PostRecord(restClient, authResource, addRecordRequest);
         }
 
         private static async Task PostRecord(
@@ -40,7 +42,7 @@ namespace Common.Services
             AuthResource authResource,
             AddRecordRequest request)
         {
-            request.UID = authResource.Uid;
+            request.Uid = authResource.Uid;
             await restClient.PostRecord(authResource.ToString(), request);
         }
 
