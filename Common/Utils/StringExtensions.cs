@@ -34,5 +34,8 @@ namespace Common.Utils
         public static string RemoveStageExtension(this string s) => 
             s.Replace(StringConstants.StageExtension, string.Empty);
 
+        public static bool IsNullOrEmpty(this string s) =>
+            string.IsNullOrEmpty(s);
+
     }
 }

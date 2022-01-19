@@ -51,8 +51,9 @@ namespace Common.Services
         }
         private static async Task<string> GetAuthToken(IGHPTravelportClient restclient, string uid)
         {
-            var token = await restclient.Authorize(uid);
-            return token;
+            var request = new AuthorizeTokenRequest { Uid = uid };
+            var response = await restclient.Authorize(request);
+            return response.Token;
         }
 
     }

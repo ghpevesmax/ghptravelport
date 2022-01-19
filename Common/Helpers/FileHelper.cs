@@ -126,7 +126,7 @@ namespace Common.Helpers
             return new Models.AuthResource
             {
                 Uid = lines.FirstOrDefault(),
-                Token = lines.LastOrDefault()
+                Token = lines.Skip(1).LastOrDefault()
             };
         }
 

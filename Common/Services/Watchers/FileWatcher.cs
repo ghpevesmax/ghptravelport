@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Refit;
 
 namespace Common.Watchers
 {
@@ -31,10 +32,14 @@ namespace Common.Watchers
         {
             FileHelper.AddLogEntry($"BasePath:{BasePath} SourcePath:{WorkingPath} FileExtensionToWatch:{FileExtensionToWatch} @{DateTime.Now}", WorkingPath);
             FileHelper.AddLogEntry(line, WorkingPath);
+            FileHelper.AddLogEntry(@$"Type: {ex.GetType()}", WorkingPath);
             FileHelper.AddLogEntry(@$"Message: {ex.Message}", WorkingPath);
+            if (ex is ApiException)
+            {
+                FileHelper.AddLogEntry(@$"Content: {(ex as ApiException).Content}", WorkingPath); 
+            }
             FileHelper.AddLogEntry(@$"InnerException: {ex.InnerException}", WorkingPath);
             FileHelper.AddLogEntry(@$"StackTrace: {ex.StackTrace}", WorkingPath);
-            FileHelper.AddLogEntry(@$"Type: {ex.GetType()}", WorkingPath);
         }
 
         public FileWatcher(string fileExtension, bool filesToStageFolder = true, double interval = 60000)
@@ -116,13 +121,7 @@ namespace Common.Watchers
                             ProviderName = headerSegment.T50ISS.Trim()
                         };
 
-                        var a14FT = new A14FT()
-                        {
-                            IdCliente = Convert.ToInt32(a14FTSegment.IdCliente.Trim()),
-                            Concepto = a14FTSegment.Concepto.Trim(),
-                            CargoPorServicio = Convert.ToDouble(a14FTSegment.CargoPorServicio.Trim()),
-                            IdUsuario = Convert.ToInt32(a14FTSegment.IdUsuario.Trim()),
-                        };
+                        var a14FT = new A14FT(a14FTSegment);
 
                         try
                         {
