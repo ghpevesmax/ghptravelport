@@ -10,5 +10,6 @@ namespace Common.Models
         }
         public string A02SEC { get; set; }
         public string A02NME { get; set; }
+        public string A02TIN_A02TKT { get; set; }
     }
 }

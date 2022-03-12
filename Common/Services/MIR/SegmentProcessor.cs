@@ -67,11 +67,27 @@ namespace Common.Services
                     continue;
                 }
 
-                var segmentDMLPropertyValue = segmentDMLPropertyValues.FirstOrDefault(pv => pv.Name == segmentProperty.Name);
-                if (segmentDMLPropertyValue != null)
+                var parentSegmentPropName = segmentProperty.Name.Contains("_") ? segmentProperty.Name.Split("_").First() : segmentProperty.Name;
+                var childSegmentPropName = segmentProperty.Name.Contains("_") ? segmentProperty.Name.Split("_").Last() : string.Empty;
+
+                var dmlPropValue = segmentDMLPropertyValues.FirstOrDefault(pv => pv.Name.StartsWith(parentSegmentPropName));
+                if (dmlPropValue != null)
                 {
                     var segmentPropValue = "";
-                    var fieldDefinition = segmentDMLPropertyValue.Value as FieldDefinition;
+                    var fieldDefinition = dmlPropValue.Value as FieldDefinition;
+
+                    if (fieldDefinition.HasNestedFields && !string.IsNullOrEmpty(childSegmentPropName))
+                    {
+                        var childFieldDefinition = fieldDefinition.NestedFields.FirstOrDefault(_ => _.Name == childSegmentPropName);
+                        if (childFieldDefinition != null)
+                        {
+                            fieldDefinition = childFieldDefinition;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
 
                     var rawSegmentStartPosition = fieldDefinition.IsOptionalField ? rawSegmentLastPosition : fieldDefinition.SegmentPosition;
                     rawSegmentLastPosition = rawSegmentStartPosition + fieldDefinition.Length;
@@ -101,34 +117,19 @@ namespace Common.Services
             return segmentInstance;
         }
 
-        private static A14FTSegment GenerateA14FTSegment(IList<RawSegment> rawStringSegments)
+        private static A14FTSegment GenerateA14FTSegment(IList<RawSegment> rawSegments)
         {
-            if (rawStringSegments != null && rawStringSegments.Any(_ => _.SegmentType != SegmentType.A14FT))
+            if (rawSegments != null && rawSegments.Any(_ => _.SegmentType != SegmentType.A14FT))
             {
                 return null;
             }
 
             var a14ftSegment = new A14FTSegment();
-            foreach (var rawSegment in rawStringSegments)
+            foreach (var rawSegment in rawSegments)
             {
-                var index = rawStringSegments
-                    .IndexOf(rawSegment);
-                var a14ftValue = rawSegment
-                    .SegmentString
-                    .Replace("A14FT-", string.Empty);
-
-                switch(index)
-                {
-                    case 0: a14ftSegment.IdCliente        = a14ftValue; 
-                            break;
-                    case 1: a14ftSegment.Concepto         = a14ftValue; 
-                            break;
-                    case 2: a14ftSegment.CargoPorServicio = a14ftValue; 
-                            break;
-                    case 3: a14ftSegment.IdUsuario        = a14ftValue; 
-                            break;
-                }
+                MapperService.MapToSegment(a14ftSegment, rawSegment);
             }
+            MapperService.OrderSubSegments(a14ftSegment);
 
             return a14ftSegment;
         }

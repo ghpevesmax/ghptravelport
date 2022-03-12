@@ -43,6 +43,6 @@ namespace Common.Lookups
                     new(){ Name = "A02INV", SegmentPosition = 60, Length = 9 },
                 }
             };
-        public static int CarriageReturnNumber => 3;
+        public static int CarriageReturnNumber => 2;
     }
 }

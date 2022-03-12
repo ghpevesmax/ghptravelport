@@ -1,4 +1,5 @@
 ﻿using Common.Helpers;
+using Common.Lookups;
 using Common.Models;
 using Common.Services;
 using Refit;
@@ -14,9 +15,10 @@ namespace ConsoleApp
 {
     class Program
     {
-        public static string FileName => @"C:\ghptravelport\stage\AAADEGAL.MIR.processed";
+        public static string FileName => @"C:\Users\Laelo\OneDrive\Documentos\Development\DesarrollosInformativos\Travelport\R4\2 Adt aereo hotel y auto.MIR";
+        //public static string FileName => @"C:\Users\Laelo\OneDrive\Documentos\Development\DesarrollosInformativos\Travelport\R4\1 Pax 1 segmento.MIR";
         public static bool IsApiTest => false;
-        public static bool IsA14FTTest => true;
+        public static SegmentType? SegmentTypeTest => SegmentType.Passenger;
 
         [STAThread]
         static async Task Main(string[] args)
@@ -24,9 +26,9 @@ namespace ConsoleApp
             Console.WriteLine(Environment.CurrentDirectory);
             if (IsApiTest)
             {
-                var passenger = new Passenger { PassengerName = "Test" };
+                var passenger = new List<Passenger> { new Passenger { PassengerName = "Test" } };
                 var cost = new Cost { Total = 1000, PrimaryTaxAmount = 160 };
-                var provider = new Provider { ProviderName = "Another Test" };
+                var provider = "Another Test";
                 var PNR = new string('a', 10);
 
                 try
@@ -64,10 +66,11 @@ namespace ConsoleApp
                 var segmentList = FileProcessor.BuildFileSegments(lines);
                 var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
                 var clipboard = new StringBuilder();
-                if(IsA14FTTest)
+
+                if(SegmentTypeTest.HasValue)
                 {
                     MIRSegments = MIRSegments
-                        .Where(_ => _ != null && _.Type == Common.Lookups.SegmentType.A14FT)
+                        .Where(_ => _ != null && _.Type == SegmentTypeTest)
                         .ToList();
                 }
 

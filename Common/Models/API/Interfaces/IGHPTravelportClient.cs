@@ -10,7 +10,7 @@ namespace Common.Models
     public interface IGHPTravelportClient
     {
         [Post("/records/store")]
-        Task PostRecord([Header("Authorization")] string auth, [Body(buffered: true)] AddRecordRequest request);
+        Task CreateReservationDetails([Header("Authorization")] string auth, [Body(buffered: true)] ApiReservationDetailsRequest request);
 
         [Post("/auth")]
         Task<AuthorizeTokenResponse> Authorize([Body(buffered: true)] AuthorizeTokenRequest request);

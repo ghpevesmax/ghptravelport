@@ -1,4 +1,6 @@
 ﻿using Common.Lookups;
+using System;
+using System.Collections.Generic;
 
 namespace Common.Models
 {
@@ -8,9 +10,14 @@ namespace Common.Models
         {
             Type = SegmentType.A14FT;
         }
-        public string IdCliente { get; set; }
-        public string Concepto { get; set; }
-        public string CargoPorServicio { get; set; }
-        public string IdUsuario { get; set; }
+        public string ClientId { get; set; }
+        public IList<string> FtMarkups { get; set; } = new List<string>();
+        public IList<string> InvoiceLines { get; set; } = new List<string>();
+        public string InvoicePaymentMethod { get; set; }
+        public string InvoicePaymentType { get; set; }
+        public IList<string> InvoiceServiceAmounts { get; set; } = new List<string>();
+        public string InvoiceUseTypeId { get; set; }
+        public string InvoiceTypeId { get; set; }
+        public string UserId { get; set; }
     }
 }

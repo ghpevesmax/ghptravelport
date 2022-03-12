@@ -5,8 +5,8 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Refit;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Common.Services
@@ -16,34 +16,22 @@ namespace Common.Services
         public static readonly string ServiceUrl = "http://apitravel.miagenciaghp.com/api";
         //public static readonly string ServiceUrl = "http://localhost:8000/api";
 
-        public static async Task SendRequest(Passenger passenger, Cost cost, Provider provider, string PNR, A14FT a14FT = null)
+        public static async Task SendRequest(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, A14FT a14FT = null)
         {
             var restClient = GetRestClient();
             var authResource = await AuthService.GetAuthResourceData(restClient);
-            var addRecordRequest = new AddRecordRequest
-            {
-                Titular = passenger.PassengerName,
-                Pasajero = passenger.PassengerName,
-                Clave = PNR,
-                Proveedor = provider.ProviderName,
-                Total = cost.Total,
-                IVA = cost.PrimaryTaxAmount,
-                IdCliente = a14FT.IdCliente,
-                Concepto = a14FT.Concepto,
-                CargoPorServicio = a14FT.CargoPorServicio,
-                IdUsuario = a14FT.IdUsuario,
-            };
+            var request = MapperService.MapToApi(passengers, cost, provider, PNR, a14FT);
 
-            await PostRecord(restClient, authResource, addRecordRequest);
+            await PostRecord(restClient, authResource, request);
         }
 
         private static async Task PostRecord(
             IGHPTravelportClient restClient,
             AuthResource authResource,
-            AddRecordRequest request)
+            ApiReservationDetailsRequest request)
         {
             request.Uid = authResource.Uid;
-            await restClient.PostRecord(authResource.ToString(), request);
+            await restClient.CreateReservationDetails(authResource.ToString(), request);
         }
 
         private static IGHPTravelportClient GetRestClient()
