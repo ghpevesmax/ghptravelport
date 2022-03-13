@@ -26,7 +26,19 @@ namespace ConsoleApp
             Console.WriteLine(Environment.CurrentDirectory);
             if (IsApiTest)
             {
-                var passenger = new List<Passenger> { new Passenger { PassengerName = "Test" } };
+                var passengers = new List<Passenger> { new Passenger { PassengerName = "Test" } };
+                var a14ft = new A14FT
+                {
+                    UserId = 1234560,
+                    ClientId = 123456,
+                    InvoiceTypeId = "T",
+                    InvoiceUseTypeId = "03",
+                    InvoicePaymentType = "PPD",
+                    InvoicePaymentMethod = "03",
+                    FtMarkups = new[] { 100.50, 200.50, 300.50 },
+                    InvoiceLines = new[] { "Concepto-P01", "Concepto-P02" },
+                    InvoiceAmounts = new[] { 1000.79, 2000.79, 3000.79 }
+                };
                 var cost = new Cost { Total = 1000, PrimaryTaxAmount = 160 };
                 var provider = "Another Test";
                 var PNR = new string('a', 10);
@@ -35,7 +47,7 @@ namespace ConsoleApp
                 {
                     var publicIpAddress = await NetworkHelper.GetPublicIpAddress();
                     Console.WriteLine($"Public IP request {publicIpAddress}");
-                    await RestClientService.SendRequest(passenger, cost, provider, PNR);
+                    await RestClientService.SendRequest(passengers, cost, provider, PNR, a14ft);
                     Console.WriteLine("API request success");
                 }
                 catch(HttpRequestException ex)

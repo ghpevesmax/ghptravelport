@@ -33,17 +33,44 @@ namespace Common.Services
 
         public static ApiPassenger[] MapToApi(IEnumerable<Passenger> passengers)
         {
-            return passengers.Select(_ => new ApiPassenger
+            var passengerList = passengers.ToList();
+            return passengerList
+                .Select(_ => new ApiPassenger
+                {
+                    Name = _.PassengerName,
+                    TicketNumber = _.TicketNumber,
+                    IsMain = (byte)(passengerList.IndexOf(_) == 0 ? 1: 0)
+                }).ToArray();
+        }
+
+        public static ApiInvoiceLine[] MapToApi(string[] invoiceLines)
+        {
+            return invoiceLines.Select(_ => new ApiInvoiceLine
             {
-                Name = _.PassengerName,
-                TicketNumber = _.TicketNumber,
-                IsMain = passengers.First().Equals(_)
+                Line = _.Trim()
             }).ToArray();
+        }
+
+        public static ApiInvoiceAmount[] MapToApiInvoiceAmount(double[] amounts)
+        {
+            return amounts
+                .Select(_ => new ApiInvoiceAmount { Amount = _ })
+                .ToArray();
+        }
+
+        public static ApiFtMarkup[] MapToApiFtMarkup(double[] amounts)
+        {
+            return amounts
+                .Select(_ => new ApiFtMarkup { Amount = _ })
+                .ToArray();
         }
 
         public static ApiReservationDetailsRequest MapToApi(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, A14FT a14FT)
         {
             var apiPassengers = MapToApi(passengers);
+            var apiInvoiceLines = MapToApi(a14FT.InvoiceLines);
+            var apiFtMarkups = MapToApiFtMarkup(a14FT.FtMarkups);
+            var apiInvoiceServiceAmounts = MapToApiInvoiceAmount(a14FT.InvoiceAmounts);
 
             return new ApiReservationDetailsRequest
             {
@@ -52,10 +79,10 @@ namespace Common.Services
                 Total = cost.Total,
                 IVA = cost.PrimaryTaxAmount,
                 ClientId = a14FT.ClientId,
-                InvoiceLines = a14FT.InvoiceLines,
-                InvoiceAmounts = a14FT.InvoiceServiceAmounts,
+                InvoiceLines = apiInvoiceLines,
+                InvoiceAmounts = apiInvoiceServiceAmounts,
                 UserId = a14FT.UserId,
-                FtMarkups = a14FT.FtMarkups,
+                FtMarkups = apiFtMarkups,
                 Passengers = apiPassengers,
                 InvoiceTypeId = a14FT.InvoiceTypeId,
                 InvoicePaymentMethod = a14FT.InvoicePaymentMethod,

@@ -43,7 +43,7 @@ namespace Common.Models
 
                 if (segment.InvoiceServiceAmounts?.Any() == true)
                 {
-                    InvoiceServiceAmounts = segment.InvoiceServiceAmounts
+                    InvoiceAmounts = segment.InvoiceServiceAmounts
                         .Select(_ => Convert.ToDouble(_.Trim()))
                         .ToArray();
                 }
@@ -66,7 +66,7 @@ namespace Common.Models
         public int ClientId { get; set; }
         public double[] FtMarkups { get; set; } = Array.Empty<double>();
         public string[] InvoiceLines { get; set; } = Array.Empty<string>();
-        public double[] InvoiceServiceAmounts { get; set; } = Array.Empty<double>();
+        public double[] InvoiceAmounts { get; set; } = Array.Empty<double>();
         public string InvoicePaymentMethod { get; set; }
         public string InvoicePaymentType { get; set; }
         public string InvoiceTypeId { get; set; }

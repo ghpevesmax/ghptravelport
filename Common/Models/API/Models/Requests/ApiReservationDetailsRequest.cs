@@ -6,12 +6,9 @@ namespace Common.Models
     public class ApiReservationDetailsRequest
     {
         public double CargoPorServicio { get; set; }
-        public double[] InvoiceAmounts { get; set; } = Array.Empty<double>();
 
         [JsonProperty(PropertyName = "clave")]
         public string PNR { get; set; }
-        public string[] InvoiceLines { get; set; } = Array.Empty<string>();
-        public double[] FtMarkups { get; set; } = Array.Empty<double>();
 
         [JsonProperty(PropertyName = "idCliente")]
         public int ClientId { get; set; }
@@ -31,20 +28,38 @@ namespace Common.Models
         [JsonProperty(PropertyName = "iva")]
         public double IVA { get; set; }
 
-        public ApiPassenger[] Passengers { get; set; } = Array.Empty<ApiPassenger>();
-
         [JsonProperty(PropertyName = "proveedor")]
         public string ProviderName { get; set; }
         public string InvoiceTypeId { get; set; }
         public double Total { get; set; }
+
+        public ApiFtMarkup[] FtMarkups { get; set; } = Array.Empty<ApiFtMarkup>();
+        public ApiPassenger[] Passengers { get; set; } = Array.Empty<ApiPassenger>();
+        public ApiInvoiceLine[] InvoiceLines { get; set; } = Array.Empty<ApiInvoiceLine>();
+        public ApiInvoiceAmount[] InvoiceAmounts { get; set; } = Array.Empty<ApiInvoiceAmount>();
     }
 
     public class ApiPassenger
     {
         public string Name { get; set; }
 
-        public bool IsMain { get; set; }
+        public byte IsMain { get; set; }
 
         public string TicketNumber { get; set; }
+    }
+
+    public class ApiInvoiceAmount
+    {
+        public double Amount { get; set; }
+    }
+
+    public class ApiInvoiceLine
+    {
+        public string Line { get; set; }
+    }
+
+    public class ApiFtMarkup
+    {
+        public double Amount { get; set; }
     }
 }
