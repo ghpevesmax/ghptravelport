@@ -30,7 +30,6 @@ namespace Common.Services
             AuthResource authResource,
             ApiReservationDetailsRequest request)
         {
-            request.Uid = authResource.Uid;
             await restClient.CreateReservationDetails(authResource.ToString(), request);
         }
 
