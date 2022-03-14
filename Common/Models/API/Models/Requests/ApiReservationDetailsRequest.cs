@@ -33,6 +33,7 @@ namespace Common.Models
         public string InvoiceTypeId { get; set; }
         public double Total { get; set; }
 
+        public Hotel[] Hotels { get; set; } = Array.Empty<Hotel>();
         public ApiFtMarkup[] FtMarkups { get; set; } = Array.Empty<ApiFtMarkup>();
         public ApiPassenger[] Passengers { get; set; } = Array.Empty<ApiPassenger>();
         public ApiInvoiceLine[] InvoiceLines { get; set; } = Array.Empty<ApiInvoiceLine>();

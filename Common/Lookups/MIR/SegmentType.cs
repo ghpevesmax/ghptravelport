@@ -2,11 +2,13 @@
 {
     public enum SegmentType
     {
-        None = -1,
-        Header = 0,
-        CustomerRemarks = 1,
-        Passenger = 3,
-        FareValue = 4,
-        A14FT = 5,
+        None,
+        Header,
+        CustomerRemarks,
+        Passenger,
+        FareValue,
+        A14FT,
+        A16HotelRoomMaster,
+        A16CarMaster,
     }
 }

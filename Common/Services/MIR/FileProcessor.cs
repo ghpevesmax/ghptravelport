@@ -38,15 +38,23 @@ namespace Common.Services
             int lineBreakOcurrences = 0;
             switch (segmentType)
             {
-                case SegmentType.Header: lineBreakOcurrences = HeaderFieldDefinition.CarriageReturnNumber;
-                                         break;
-                case SegmentType.CustomerRemarks: lineBreakOcurrences = CustomerRemarkFieldDefinition.CarriageReturnNumber;
-                                         break;
-                case SegmentType.Passenger: lineBreakOcurrences = PassengerFieldDefinition.CarriageReturnNumber;
-                                         break;
-                case SegmentType.FareValue: lineBreakOcurrences = FareValueFieldDefinition.CarriageReturnNumber;
-                                         break;
+                case SegmentType.Header: 
+                    lineBreakOcurrences = HeaderFieldDefinition.CarriageReturnNumber;
+                    break;
+                case SegmentType.CustomerRemarks: 
+                    lineBreakOcurrences = CustomerRemarkFieldDefinition.CarriageReturnNumber;
+                    break;
+                case SegmentType.Passenger: 
+                    lineBreakOcurrences = PassengerFieldDefinition.CarriageReturnNumber;
+                    break;
+                case SegmentType.FareValue: 
+                    lineBreakOcurrences = FareValueFieldDefinition.CarriageReturnNumber;
+                    break;
+                case SegmentType.A16HotelRoomMaster:
+                    lineBreakOcurrences = GetA16LineBraks(lines, currentLine);
+                    break;
             }
+
             var segmentLines = lines.ElementAt(currentLine);
             if (lineBreakOcurrences > 0)
             {
@@ -62,6 +70,27 @@ namespace Common.Services
                 },
                 LineBreaks = lineBreakOcurrences,
             };
+        }
+
+        internal static int GetA16LineBraks(IEnumerable<string> lines, int currentLine)
+        {
+            var remainingLines = lines
+                           .Skip(currentLine + 1);
+
+            if (remainingLines.Any())
+            {
+                var nextA16Line = lines
+                    .Skip(currentLine + 1)
+                    .ToList()
+                    .FindIndex(_ => _
+                        .StartsWith("A16")
+                    );
+                return nextA16Line;
+            }
+            else
+            {
+                return lines.Count() - currentLine;
+            }
         }
     }
 }

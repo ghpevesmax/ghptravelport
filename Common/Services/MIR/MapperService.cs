@@ -31,6 +31,19 @@ namespace Common.Services
             };
         }
 
+        public static Hotel MapFromSegment(A16HotelSegment segment)
+        {
+            var amount = segment.A16OD_A16RG.Substring(3);
+            var currency = segment.A16OD_A16RG.Substring(0, 3);
+            return new Hotel
+            {
+                Currency = currency.Trim(),
+                Name = segment.A16NME.Trim(),
+                Amount = Convert.ToDouble(amount.Trim()),
+                ConfirmationNumber = segment.A16CF.Trim()
+            };
+        }
+
         public static ApiPassenger[] MapToApi(IEnumerable<Passenger> passengers)
         {
             var passengerList = passengers.ToList();
@@ -51,6 +64,34 @@ namespace Common.Services
             }).ToArray();
         }
 
+        public static ApiReservationDetailsRequest MapToApi(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, A14FT a14FT, IEnumerable<Hotel> hotels)
+        {
+            var apiHotels = hotels.ToArray();
+            var apiPassengers = MapToApi(passengers);
+            var apiInvoiceLines = MapToApi(a14FT.InvoiceLines);
+            var apiFtMarkups = MapToApiFtMarkup(a14FT.FtMarkups);
+            var apiInvoiceServiceAmounts = MapToApiInvoiceAmount(a14FT.InvoiceAmounts);
+
+            return new ApiReservationDetailsRequest
+            {
+                PNR = PNR,
+                Total = cost.Total,
+                Hotels = apiHotels,
+                UserId = a14FT.UserId,
+                ProviderName = provider,
+                FtMarkups = apiFtMarkups,
+                ClientId = a14FT.ClientId,
+                Passengers = apiPassengers,
+                IVA = cost.PrimaryTaxAmount,
+                InvoiceLines = apiInvoiceLines,
+                InvoiceTypeId = a14FT.InvoiceTypeId,
+                InvoiceAmounts = apiInvoiceServiceAmounts,
+                InvoicePayment = a14FT.InvoicePaymentType,
+                InvoiceUseTypeId = a14FT.InvoiceUseTypeId,
+                InvoicePaymentMethod = a14FT.InvoicePaymentMethod,
+            };
+        }
+
         public static ApiInvoiceAmount[] MapToApiInvoiceAmount(double[] amounts)
         {
             return amounts
@@ -63,32 +104,6 @@ namespace Common.Services
             return amounts
                 .Select(_ => new ApiFtMarkup { Amount = _ })
                 .ToArray();
-        }
-
-        public static ApiReservationDetailsRequest MapToApi(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, A14FT a14FT)
-        {
-            var apiPassengers = MapToApi(passengers);
-            var apiInvoiceLines = MapToApi(a14FT.InvoiceLines);
-            var apiFtMarkups = MapToApiFtMarkup(a14FT.FtMarkups);
-            var apiInvoiceServiceAmounts = MapToApiInvoiceAmount(a14FT.InvoiceAmounts);
-
-            return new ApiReservationDetailsRequest
-            {
-                PNR = PNR,
-                ProviderName = provider,
-                Total = cost.Total,
-                IVA = cost.PrimaryTaxAmount,
-                ClientId = a14FT.ClientId,
-                InvoiceLines = apiInvoiceLines,
-                InvoiceAmounts = apiInvoiceServiceAmounts,
-                UserId = a14FT.UserId,
-                FtMarkups = apiFtMarkups,
-                Passengers = apiPassengers,
-                InvoiceTypeId = a14FT.InvoiceTypeId,
-                InvoicePaymentMethod = a14FT.InvoicePaymentMethod,
-                InvoicePayment = a14FT.InvoicePaymentType,
-                InvoiceUseTypeId = a14FT.InvoiceUseTypeId,
-            };
         }
 
         public static void MapToSegment(A14FTSegment segment, RawSegment rawSegment)

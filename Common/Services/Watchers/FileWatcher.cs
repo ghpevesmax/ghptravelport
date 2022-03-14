@@ -99,21 +99,29 @@ namespace Common.Watchers
                         var segmentList = FileProcessor.BuildFileSegments(lines);
                         var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
 
-                        var headerSegment = MIRSegments.FirstOrDefault(_ => _.Type == SegmentType.Header) as HeaderSegment;
-                        var taxSegment = MIRSegments.FirstOrDefault(_ => _.Type == SegmentType.FareValue) as FareValueSegment;
-                        var a14FTSegment = MIRSegments.FirstOrDefault(_ => _.Type == SegmentType.A14FT) as A14FTSegment;
-                        var passengerSegments = MIRSegments.Where(_ => _.Type == SegmentType.Passenger)
-                                            .Select(_ => _ as PassengerSegment);
+                        var passengerSegments = MIRSegments
+                            .Where(_ => _.Type == SegmentType.Passenger)
+                            .Select(_ => _ as PassengerSegment);
+                        var hotelSegments = MIRSegments
+                            .Where(_ => _.Type == SegmentType.A16HotelRoomMaster)
+                            .Select(_ => _ as A16HotelSegment);
+                        var a14FTSegment = MIRSegments
+                            .FirstOrDefault(_ => _.Type == SegmentType.A14FT) as A14FTSegment;
+                        var headerSegment = MIRSegments
+                            .FirstOrDefault(_ => _.Type == SegmentType.Header) as HeaderSegment;
+                        var taxSegment = MIRSegments
+                            .FirstOrDefault(_ => _.Type == SegmentType.FareValue) as FareValueSegment;
 
                         var a14FT = new A14FT(a14FTSegment);
                         var PNR = headerSegment.T50RCL.Trim();
                         var provider = headerSegment.T50ISS.Trim();
                         var cost = MapperService.MapFromSegment(taxSegment);
+                        var hotels = hotelSegments.Select(MapperService.MapFromSegment);
                         var passengers = MapperService.MapFromSegment(passengerSegments);
 
                         try
                         {
-                            await RestClientService.SendRequest(passengers, cost, provider, PNR, a14FT);
+                            await RestClientService.SendRequest(passengers, cost, provider, PNR, a14FT, hotels);
                             FileHelper.MoveFileToProcessed(sourceFileFullName);
                         }
                         catch (Exception)

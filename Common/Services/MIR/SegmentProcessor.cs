@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Common.Models;
 using Common.Lookups;
+using Common.Utils;
 
 namespace Common.Services
 {
@@ -11,11 +12,11 @@ namespace Common.Services
         public static List<BaseSegment> GenerateAllSegments(List<RawSegment> segmentList)
         {
             var baseSegments = new List<BaseSegment>();
-            var generalSegments = segmentList
-                .Where(s => s.SegmentType != SegmentType.A14FT);
             var a14FTSegments = segmentList
                 .Where(s => s.SegmentType == SegmentType.A14FT)
                 .ToList();
+            var generalSegments = segmentList
+                .Where(_ => _.SegmentType != SegmentType.A14FT);
 
             foreach (var segment in generalSegments)
             {
@@ -43,16 +44,23 @@ namespace Common.Services
                 case SegmentType.Header: segmentInstance = new HeaderSegment();
                                          segmentTypeDefinition = typeof(HeaderFieldDefinition);
                                          break;
-                case SegmentType.CustomerRemarks: segmentInstance = new CustomerRemarkSegment();
+                case SegmentType.CustomerRemarks: 
+                                         segmentInstance = new CustomerRemarkSegment();
                                          segmentTypeDefinition = typeof(CustomerRemarkFieldDefinition);
                                          break;
-                case SegmentType.Passenger: segmentInstance = new PassengerSegment();
+                case SegmentType.Passenger: 
+                                         segmentInstance = new PassengerSegment();
                                          segmentTypeDefinition = typeof(PassengerFieldDefinition);
                                          break;
-                case SegmentType.FareValue: segmentInstance = new FareValueSegment();
+                case SegmentType.FareValue: 
+                                         segmentInstance = new FareValueSegment();
                                          segmentTypeDefinition = typeof(FareValueFieldDefinition);
                                          break;
-                case SegmentType.A14FT: return null;
+                case SegmentType.A16HotelRoomMaster: 
+                                         segmentInstance = new A16HotelSegment();
+                                         segmentTypeDefinition = typeof(HotelFieldDefinition);
+                                         break;
+                default: return null;
             }
 
             var previousSegmentPropIsNotPresent = false;
@@ -89,29 +97,71 @@ namespace Common.Services
                         }
                     }
 
-                    var rawSegmentStartPosition = fieldDefinition.IsOptionalField ? rawSegmentLastPosition : fieldDefinition.SegmentPosition;
-                    rawSegmentLastPosition = rawSegmentStartPosition + fieldDefinition.Length;
-
-                    if (rawSegment.Length >= rawSegmentLastPosition)
+                    if(fieldDefinition.IsComplexField && fieldDefinition.HasCodeId)
                     {
-                        var propValue = rawSegment.Substring(rawSegmentStartPosition, fieldDefinition.Length);
-                        if(fieldDefinition.IsOptionalField)
+                        var segmentChunks = rawSegment.Split("|");
+                        var complexField = string.Empty;
+
+                        if (fieldDefinition.IsOptionalContained)
                         {
-                            if (fieldDefinition.HasOptionalCodeId)
+                            complexField = segmentChunks
+                                .FirstOrDefault(_ => _
+                                    .StartsWith(fieldDefinition.CodeId)
+                                );
+
+                            if (!complexField.IsNullOrEmpty())
                             {
-                                if (string.IsNullOrEmpty(fieldDefinition.OptionalCodeId) || propValue != fieldDefinition.OptionalCodeId)
-                                {
-                                    rawSegmentLastPosition = rawSegmentStartPosition;
-                                    previousSegmentPropIsNotPresent = true;
-                                    continue;
-                                } 
+                                segmentPropValue = complexField
+                                    .Replace(fieldDefinition.CodeId, string.Empty)
+                                    .Substring(fieldDefinition.SegmentPosition);
                             }
                         }
+                        else
+                        {
+                            foreach (var chunk in segmentChunks)
+                            {
+                                var optionalDelimitedChunks = chunk.Split(fieldDefinition.Delimitator);
+                                complexField = optionalDelimitedChunks
+                                    .FirstOrDefault(_ => _
+                                        .Contains(fieldDefinition.CodeId)
+                                    );
 
-                        segmentPropValue = propValue;
-                        if (segmentProperty.CanWrite)
-                            PropertiesService.SetPropertyValue(segmentInstance, segmentProperty.Name, segmentPropValue);
+                                if (!complexField.IsNullOrEmpty())
+                                {
+                                    segmentPropValue = complexField
+                                        .Replace(fieldDefinition.CodeId, string.Empty);
+                                    break;
+                                }
+                            }
+
+                        }                    
                     }
+                    else
+                    {
+                        var rawSegmentStartPosition = GetRawSegmentStartPosition(fieldDefinition, rawSegmentLastPosition);
+                        rawSegmentLastPosition = rawSegmentStartPosition + fieldDefinition.Length;
+
+                        if (rawSegment.Length >= rawSegmentLastPosition)
+                        {
+                            var propValue = rawSegment.Substring(rawSegmentStartPosition, fieldDefinition.Length);
+                            if (fieldDefinition.IsOptionalField)
+                            {
+                                if (fieldDefinition.HasCodeId)
+                                {
+                                    if (string.IsNullOrEmpty(fieldDefinition.CodeId) || propValue != fieldDefinition.CodeId)
+                                    {
+                                        rawSegmentLastPosition = rawSegmentStartPosition;
+                                        previousSegmentPropIsNotPresent = true;
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            segmentPropValue = propValue;
+                        } 
+                    }
+
+                    SetPropertyValue(segmentInstance, segmentProperty, segmentPropValue);
                 }
             }
             return segmentInstance;
@@ -162,7 +212,30 @@ namespace Common.Services
                 segmentType = SegmentType.A14FT;
             }
 
+            if (line.StartsWith("A16A"))
+            {
+                segmentType = SegmentType.A16HotelRoomMaster;
+            }
+
             return segmentType;
+        }
+
+        internal static int GetRawSegmentStartPosition(FieldDefinition fieldDefinition, int lastPosition)
+        {
+            if(fieldDefinition.IsOptionalField && fieldDefinition.SegmentPosition == default)
+            {
+                return lastPosition;
+            }
+            else
+            {
+                return fieldDefinition.SegmentPosition;
+            }
+        }
+
+        internal static void SetPropertyValue(BaseSegment segmentInstance, Property segmentProperty, string segmentPropValue)
+        {
+            if (segmentProperty.CanWrite)
+                PropertiesService.SetPropertyValue(segmentInstance, segmentProperty.Name, segmentPropValue);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace ConsoleApp
         public static string FileName => @"C:\Users\Laelo\OneDrive\Documentos\Development\DesarrollosInformativos\Travelport\R4\2 Adt aereo hotel y auto.MIR";
         //public static string FileName => @"C:\Users\Laelo\OneDrive\Documentos\Development\DesarrollosInformativos\Travelport\R4\1 Pax 1 segmento.MIR";
         public static bool IsApiTest => false;
-        public static SegmentType? SegmentTypeTest => SegmentType.Passenger;
+        public static SegmentType? SegmentTypeTest => SegmentType.A16HotelRoomMaster;
 
         [STAThread]
         static async Task Main(string[] args)
@@ -42,12 +42,20 @@ namespace ConsoleApp
                 var cost = new Cost { Total = 1000, PrimaryTaxAmount = 160 };
                 var provider = "Another Test";
                 var PNR = new string('a', 10);
+                var hotels = new Hotel[] { 
+                    new Hotel { 
+                        Amount = 123.50, 
+                        Name = "Hilton",
+                        Currency = "USD", 
+                        ConfirmationNumber = "123456789", 
+                    } 
+                };
 
                 try
                 {
                     var publicIpAddress = await NetworkHelper.GetPublicIpAddress();
                     Console.WriteLine($"Public IP request {publicIpAddress}");
-                    await RestClientService.SendRequest(passengers, cost, provider, PNR, a14ft);
+                    await RestClientService.SendRequest(passengers, cost, provider, PNR, a14ft, hotels);
                     Console.WriteLine("API request success");
                 }
                 catch(HttpRequestException ex)
