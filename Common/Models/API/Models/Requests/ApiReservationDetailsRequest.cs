@@ -30,6 +30,8 @@ namespace Common.Models
 
         [JsonProperty(PropertyName = "proveedor")]
         public string ProviderName { get; set; }
+        
+        [JsonProperty(PropertyName = "tipoDocumento")]
         public string InvoiceTypeId { get; set; }
         public double Total { get; set; }
 

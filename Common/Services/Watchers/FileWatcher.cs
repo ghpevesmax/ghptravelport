@@ -97,17 +97,17 @@ namespace Common.Watchers
                     if (lines.Any())
                     {
                         var segmentList = FileProcessor.BuildFileSegments(lines);
-                        var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
+                        var mirSegments = SegmentProcessor.GenerateAllSegments(segmentList);
 
-                        var passengerSegments = MIRSegments.All(SegmentType.Passenger)
+                        var passengerSegments = mirSegments.All(SegmentType.Passenger)
                             .Select(_ => _ as PassengerSegment);
-                        var hotelSegments = MIRSegments.All(SegmentType.A16Hotel)
+                        var hotelSegments = mirSegments.All(SegmentType.A16Hotel)
                             .Select(_ => _ as A16HotelSegment);
-                        var carSegments = MIRSegments.All(SegmentType.A16Car)
+                        var carSegments = mirSegments.All(SegmentType.A16Car)
                             .Select(_ => _ as A16CarSegment);
-                        var a14FTSegment = MIRSegments.First(SegmentType.A14FT) as A14FTSegment;
-                        var headerSegment = MIRSegments.First(SegmentType.Header) as HeaderSegment;
-                        var taxSegment = MIRSegments.First(SegmentType.FareValue) as FareValueSegment;
+                        var a14FTSegment = mirSegments.First(SegmentType.A14FT) as A14FTSegment;
+                        var headerSegment = mirSegments.First(SegmentType.Header) as HeaderSegment;
+                        var taxSegment = mirSegments.First(SegmentType.FareValue) as FareValueSegment;
 
                         var a14FT = new A14FT(a14FTSegment);
                         var PNR = headerSegment.T50RCL.Trim();
