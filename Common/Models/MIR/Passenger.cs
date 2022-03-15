@@ -9,5 +9,6 @@ namespace Common.Models
     public class Passenger
     {
         public string PassengerName { get; set; }
+        public string TicketNumber { get; set; }
     }
 }

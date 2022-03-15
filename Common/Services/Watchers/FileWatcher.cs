@@ -97,35 +97,34 @@ namespace Common.Watchers
                     if (lines.Any())
                     {
                         var segmentList = FileProcessor.BuildFileSegments(lines);
-                        var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
+                        var mirSegments = SegmentProcessor.GenerateAllSegments(segmentList);
 
-                        var headerSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.Header) as HeaderSegment;
-                        var passengerSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.Passenger) as PassengerSegment;
-                        var taxSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.FareValue) as FareValueSegment;
-                        var a14FTSegment = MIRSegments.FirstOrDefault(mir => mir.Type == SegmentType.A14FT) as A14FTSegment;
-
-                        var PNR = headerSegment.T50RCL.Trim();
-                        var passenger = new Passenger
-                        {
-                            PassengerName = passengerSegment.A02NME.Trim()
-                        };
-
-                        var cost = new Cost
-                        {
-                            Total = Convert.ToDouble(taxSegment.A07TTA.Trim()),
-                            PrimaryTaxAmount = Convert.ToDouble(taxSegment.A07TT1.Trim())
-                        };
-
-                        var provider = new Provider
-                        {
-                            ProviderName = headerSegment.T50ISS.Trim()
-                        };
+                        var passengerSegments = mirSegments.All(SegmentType.Passenger)
+                            .Select(_ => _ as PassengerSegment);
+                        var hotelSegments = mirSegments.All(SegmentType.A16Hotel)
+                            .Select(_ => _ as A16HotelSegment);
+                        var carSegments = mirSegments.All(SegmentType.A16Car)
+                            .Select(_ => _ as A16CarSegment);
+                        var a14FTSegment = mirSegments.First(SegmentType.A14FT) as A14FTSegment;
+                        var headerSegment = mirSegments.First(SegmentType.Header) as HeaderSegment;
+                        var taxSegment = mirSegments.First(SegmentType.FareValue) as FareValueSegment;
 
                         var a14FT = new A14FT(a14FTSegment);
+                        var PNR = headerSegment.T50RCL.Trim();
+                        var provider = headerSegment.T50ISS.Trim();
+                        var cost = MapperService.MapFromSegment(taxSegment);
+                        var cars = carSegments.Select(MapperService.MapFromSegment);
+                        var hotels = hotelSegments.Select(MapperService.MapFromSegment);
+                        var passengers = MapperService.MapFromSegment(passengerSegments);
 
                         try
                         {
-                            await RestClientService.SendRequest(passenger, cost, provider, PNR, a14FT);
+                            var apiRequest = MapperService
+                                    .MapToApi(passengers, cost, provider, PNR, a14FT);
+                                apiRequest.Cars = cars.ToArray();
+                                apiRequest.Hotels = hotels.ToArray();
+
+                            await RestClientService.SendRequest(apiRequest);
                             FileHelper.MoveFileToProcessed(sourceFileFullName);
                         }
                         catch (Exception)

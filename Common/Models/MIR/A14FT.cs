@@ -1,5 +1,6 @@
 ﻿using Common.Utils;
 using System;
+using System.Linq;
 
 namespace Common.Models
 {
@@ -10,27 +11,66 @@ namespace Common.Models
         {
             if (segment != null)
             {
-                if (!segment.IdCliente.IsNullOrEmpty())
+                if (!segment.ClientId.IsNullOrEmpty())
                 {
-                    IdCliente = Convert.ToInt32(segment.IdCliente.Trim()); 
+                    ClientId = Convert.ToInt32(segment.ClientId.Trim());
                 }
-                if (!segment.Concepto.IsNullOrEmpty())
+
+                if (!segment.UserId.IsNullOrEmpty())
                 {
-                    Concepto = segment.Concepto.Trim(); 
+                    UserId = Convert.ToInt32(segment.UserId.Trim());
                 }
-                if (!segment.CargoPorServicio.IsNullOrEmpty())
+
+                if (!segment.InvoiceTypeId.IsNullOrEmpty())
                 {
-                    CargoPorServicio = Convert.ToDouble(segment.CargoPorServicio.Trim()); 
+                    InvoiceTypeId = segment.InvoiceTypeId.Trim();
                 }
-                if (!segment.IdUsuario.IsNullOrEmpty())
+
+                if (!segment.InvoicePaymentMethod.IsNullOrEmpty())
                 {
-                    IdUsuario = Convert.ToInt32(segment.IdUsuario.Trim());
+                    InvoicePaymentMethod = segment.InvoicePaymentMethod.Trim();
+                }
+
+                if (!segment.InvoicePaymentType.IsNullOrEmpty())
+                {
+                    InvoicePaymentType = segment.InvoicePaymentType.Trim(); 
+                }
+
+                if (!segment.InvoiceUseTypeId.IsNullOrEmpty())
+                {
+                    InvoiceUseTypeId = segment.InvoiceUseTypeId.Trim();
+                }
+
+                if (segment.InvoiceServiceAmounts?.Any() == true)
+                {
+                    InvoiceAmounts = segment.InvoiceServiceAmounts
+                        .Select(_ => Convert.ToDouble(_.Trim()))
+                        .ToArray();
+                }
+
+                if (segment.InvoiceLines?.Any() == true)
+                {
+                    InvoiceLines = segment.InvoiceLines
+                        .Select(_ => _.Trim())
+                        .ToArray();
+                }
+
+                if (segment.FtMarkups?.Any() == true)
+                {
+                    FtMarkups = segment.FtMarkups
+                        .Select(_ => Convert.ToDouble(_.Trim()))
+                        .ToArray();
                 }
             }
         }
-        public int IdCliente { get; set; }
-        public string Concepto { get; set; }
-        public double CargoPorServicio { get; set; }
-        public int IdUsuario { get; set; }
+        public int ClientId { get; set; }
+        public double[] FtMarkups { get; set; } = Array.Empty<double>();
+        public string[] InvoiceLines { get; set; } = Array.Empty<string>();
+        public double[] InvoiceAmounts { get; set; } = Array.Empty<double>();
+        public string InvoicePaymentMethod { get; set; }
+        public string InvoicePaymentType { get; set; }
+        public string InvoiceTypeId { get; set; }
+        public string InvoiceUseTypeId { get; set; }
+        public int UserId { get; set; }
     }
 }

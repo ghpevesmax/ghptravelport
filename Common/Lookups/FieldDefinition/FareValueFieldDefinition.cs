@@ -70,7 +70,7 @@ namespace Common.Lookups
                 Name = "A07NRI",
                 Length = 3,
                 IsOptionalField = true,
-                OptionalCodeId = "NR:",
+                CodeId = "NR:",
             };
         public static FieldDefinition A07NRT =>
             new()

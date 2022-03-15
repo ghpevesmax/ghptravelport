@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using Common.Models;
 using Common.Lookups;
+using Common.Utils;
 
 namespace Common.Services
 {
@@ -38,15 +39,24 @@ namespace Common.Services
             int lineBreakOcurrences = 0;
             switch (segmentType)
             {
-                case SegmentType.Header: lineBreakOcurrences = HeaderFieldDefinition.CarriageReturnNumber;
-                                         break;
-                case SegmentType.CustomerRemarks: lineBreakOcurrences = CustomerRemarkFieldDefinition.CarriageReturnNumber;
-                                         break;
-                case SegmentType.Passenger: lineBreakOcurrences = PassengerFieldDefinition.CarriageReturnNumber;
-                                         break;
-                case SegmentType.FareValue: lineBreakOcurrences = FareValueFieldDefinition.CarriageReturnNumber;
-                                         break;
+                case SegmentType.Header: 
+                    lineBreakOcurrences = HeaderFieldDefinition.CarriageReturnNumber;
+                    break;
+                case SegmentType.CustomerRemarks: 
+                    lineBreakOcurrences = CustomerRemarkFieldDefinition.CarriageReturnNumber;
+                    break;
+                case SegmentType.Passenger: 
+                    lineBreakOcurrences = PassengerFieldDefinition.CarriageReturnNumber;
+                    break;
+                case SegmentType.FareValue: 
+                    lineBreakOcurrences = FareValueFieldDefinition.CarriageReturnNumber;
+                    break;
+                case SegmentType.A16Car:
+                case SegmentType.A16Hotel:
+                    lineBreakOcurrences = GetA16LineBraks(lines, currentLine);
+                    break;
             }
+
             var segmentLines = lines.ElementAt(currentLine);
             if (lineBreakOcurrences > 0)
             {
@@ -62,6 +72,40 @@ namespace Common.Services
                 },
                 LineBreaks = lineBreakOcurrences,
             };
+        }
+
+        internal static int GetA16LineBraks(IEnumerable<string> lines, int currentLine)
+        {
+            var nextSegmentIdx = 0;
+            var remainingLines = lines
+                           .Skip(currentLine + 1);
+
+            if (remainingLines.Any())
+            {
+                foreach (var segmentId in SegmentIdentifier.AllIds)
+                {
+                    nextSegmentIdx = lines
+                        .Skip(currentLine + 1)
+                        .ToList()
+                        .FindIndex(_ => _
+                            .StartsWith(segmentId)
+                        );
+
+                    if (nextSegmentIdx > 0)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if(nextSegmentIdx > 0)
+            {
+                return nextSegmentIdx;
+            }
+            else
+            {
+                return lines.Count(_ => _ != "\f" ) - currentLine;
+            }
         }
     }
 }
