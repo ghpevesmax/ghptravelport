@@ -18,5 +18,15 @@ namespace Common.Utils
                     .LastOrDefault()
                 ).ToList();
         }
+        public static BaseSegment First(this IList<BaseSegment> mirSegments, SegmentType segmentType) 
+        {
+            return mirSegments
+                .FirstOrDefault(_ => _.Type == segmentType);
+        }
+        public static IEnumerable<BaseSegment> All(this IList<BaseSegment> mirSegments, SegmentType segmentType) 
+        {
+            return mirSegments
+                .Where(_ => _.Type == segmentType);
+        }
     }
 }

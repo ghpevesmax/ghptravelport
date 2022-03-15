@@ -6,6 +6,7 @@ using Newtonsoft.Json.Serialization;
 using Refit;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -13,14 +14,13 @@ namespace Common.Services
 {
     public static class RestClientService
     {
-        public static readonly string ServiceUrl = "http://apitravel.miagenciaghp.com/api";
-        //public static readonly string ServiceUrl = "http://localhost:8000/api";
+        //public static readonly string ServiceUrl = "http://apitravel.miagenciaghp.com/api";
+        public static readonly string ServiceUrl = "http://localhost:8000/api";
 
-        public static async Task SendRequest(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, A14FT a14FT, IEnumerable<Hotel> hotels)
+        public static async Task SendRequest(ApiReservationDetailsRequest request)
         {
             var restClient = GetRestClient();
             var authResource = await AuthService.GetAuthResourceData(restClient);
-            var request = MapperService.MapToApi(passengers, cost, provider, PNR, a14FT, hotels);
 
             await PostRecord(restClient, authResource, request);
         }

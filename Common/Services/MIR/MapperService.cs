@@ -44,6 +44,19 @@ namespace Common.Services
             };
         }
 
+        public static Car MapFromSegment(A16CarSegment segment)
+        {
+            var amount = segment.A16OD_A16RG.Substring(3);
+            var currency = segment.A16OD_A16RG.Substring(0, 3);
+            return new Car
+            {
+                Currency = currency.Trim(),
+                Name = segment.A16CAR.Trim(),
+                Amount = Convert.ToDouble(amount.Trim()),
+                ConfirmationNumber = segment.A16CF.Trim()
+            };
+        }
+
         public static ApiPassenger[] MapToApi(IEnumerable<Passenger> passengers)
         {
             var passengerList = passengers.ToList();
@@ -64,19 +77,17 @@ namespace Common.Services
             }).ToArray();
         }
 
-        public static ApiReservationDetailsRequest MapToApi(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, A14FT a14FT, IEnumerable<Hotel> hotels)
+        public static ApiReservationDetailsRequest MapToApi(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, A14FT a14FT)
         {
-            var apiHotels = hotels.ToArray();
             var apiPassengers = MapToApi(passengers);
             var apiInvoiceLines = MapToApi(a14FT.InvoiceLines);
             var apiFtMarkups = MapToApiFtMarkup(a14FT.FtMarkups);
-            var apiInvoiceServiceAmounts = MapToApiInvoiceAmount(a14FT.InvoiceAmounts);
+            var apiInvoiceAmounts = MapToApiInvoiceAmount(a14FT.InvoiceAmounts);
 
             return new ApiReservationDetailsRequest
             {
                 PNR = PNR,
                 Total = cost.Total,
-                Hotels = apiHotels,
                 UserId = a14FT.UserId,
                 ProviderName = provider,
                 FtMarkups = apiFtMarkups,
@@ -85,7 +96,7 @@ namespace Common.Services
                 IVA = cost.PrimaryTaxAmount,
                 InvoiceLines = apiInvoiceLines,
                 InvoiceTypeId = a14FT.InvoiceTypeId,
-                InvoiceAmounts = apiInvoiceServiceAmounts,
+                InvoiceAmounts = apiInvoiceAmounts,
                 InvoicePayment = a14FT.InvoicePaymentType,
                 InvoiceUseTypeId = a14FT.InvoiceUseTypeId,
                 InvoicePaymentMethod = a14FT.InvoicePaymentMethod,

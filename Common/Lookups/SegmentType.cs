@@ -8,7 +8,7 @@
         Passenger,
         FareValue,
         A14FT,
-        A16HotelRoomMaster,
-        A16CarMaster,
+        A16Hotel,
+        A16Car,
     }
 }

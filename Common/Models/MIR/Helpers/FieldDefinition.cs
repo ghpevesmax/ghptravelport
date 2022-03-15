@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Common.Utils;
 
 namespace Common.Models
 {
@@ -19,10 +15,13 @@ namespace Common.Models
         /// </summary>
         public bool IsOptionalField { get; set; }
         public string CodeId { get; set; }
-        public bool HasCodeId => !string.IsNullOrEmpty(CodeId);
+        public bool HasCodeId => !CodeId.IsNullOrEmpty();
         public string Delimitator { get; set; }
-        public bool IsDelimitatorDriven => !string.IsNullOrEmpty(Delimitator);
+        public bool IsDelimitatorDriven => !Delimitator.IsNullOrEmpty();
         public bool IsOptionalContained { get; set; }
         public bool IsComplexField => IsDelimitatorDriven || IsOptionalContained;
+        public string NestedDelimitator { get; set; }
+        public bool IsNestedDelimitatorDriven => !NestedDelimitator.IsNullOrEmpty();
+        public int CropIndex { get; set; }
     }
 }

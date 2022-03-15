@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using Common.Models;
 using Common.Lookups;
+using Common.Utils;
 
 namespace Common.Services
 {
@@ -50,7 +51,8 @@ namespace Common.Services
                 case SegmentType.FareValue: 
                     lineBreakOcurrences = FareValueFieldDefinition.CarriageReturnNumber;
                     break;
-                case SegmentType.A16HotelRoomMaster:
+                case SegmentType.A16Car:
+                case SegmentType.A16Hotel:
                     lineBreakOcurrences = GetA16LineBraks(lines, currentLine);
                     break;
             }
@@ -74,22 +76,35 @@ namespace Common.Services
 
         internal static int GetA16LineBraks(IEnumerable<string> lines, int currentLine)
         {
+            var nextSegmentIdx = 0;
             var remainingLines = lines
                            .Skip(currentLine + 1);
 
             if (remainingLines.Any())
             {
-                var nextA16Line = lines
-                    .Skip(currentLine + 1)
-                    .ToList()
-                    .FindIndex(_ => _
-                        .StartsWith("A16")
-                    );
-                return nextA16Line;
+                foreach (var segmentId in SegmentIdentifier.AllIds)
+                {
+                    nextSegmentIdx = lines
+                        .Skip(currentLine + 1)
+                        .ToList()
+                        .FindIndex(_ => _
+                            .StartsWith(segmentId)
+                        );
+
+                    if (nextSegmentIdx > 0)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if(nextSegmentIdx > 0)
+            {
+                return nextSegmentIdx;
             }
             else
             {
-                return lines.Count() - currentLine;
+                return lines.Count(_ => _ != "\f" ) - currentLine;
             }
         }
     }

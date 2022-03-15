@@ -17,8 +17,50 @@ namespace ConsoleApp
     {
         public static string FileName => @"C:\Users\Laelo\OneDrive\Documentos\Development\DesarrollosInformativos\Travelport\R4\2 Adt aereo hotel y auto.MIR";
         //public static string FileName => @"C:\Users\Laelo\OneDrive\Documentos\Development\DesarrollosInformativos\Travelport\R4\1 Pax 1 segmento.MIR";
-        public static bool IsApiTest => false;
-        public static SegmentType? SegmentTypeTest => SegmentType.A16HotelRoomMaster;
+        public static bool IsApiTest => true;
+        public static SegmentType? SegmentTypeTest => SegmentType.A16Car;
+
+        private static ApiReservationDetailsRequest SetTestData()
+        {
+
+            var passengers = new List<Passenger> { new Passenger { PassengerName = "Test" } };
+            var a14ft = new A14FT
+            {
+                UserId = 1234560,
+                ClientId = 123456,
+                InvoiceTypeId = "T",
+                InvoiceUseTypeId = "03",
+                InvoicePaymentType = "PPD",
+                InvoicePaymentMethod = "03",
+                FtMarkups = new[] { 100.50, 200.50, 300.50 },
+                InvoiceLines = new[] { "Concepto-P01", "Concepto-P02" },
+                InvoiceAmounts = new[] { 1000.79, 2000.79, 3000.79 }
+            };
+            var cost = new Cost { Total = 1000, PrimaryTaxAmount = 160 };
+            var provider = "Another Test";
+            var PNR = new string('a', 10);
+            var hotels = new Hotel[] {
+                    new() {
+                        Amount = 123.50,
+                        Name = "Hilton",
+                        Currency = "USD",
+                        ConfirmationNumber = "123456789",
+                    }
+                };
+            var cars = new Car[] {
+                    new() {
+                        Amount = 123.50,
+                        Name = "Hilton",
+                        Currency = "USD",
+                        ConfirmationNumber = "123456789",
+                    }
+                };
+
+            var apiRequest = MapperService.MapToApi(passengers, cost, provider, PNR, a14ft);
+            apiRequest.Hotels = hotels;
+            apiRequest.Cars = cars;
+            return apiRequest;
+        }
 
         [STAThread]
         static async Task Main(string[] args)
@@ -26,36 +68,13 @@ namespace ConsoleApp
             Console.WriteLine(Environment.CurrentDirectory);
             if (IsApiTest)
             {
-                var passengers = new List<Passenger> { new Passenger { PassengerName = "Test" } };
-                var a14ft = new A14FT
-                {
-                    UserId = 1234560,
-                    ClientId = 123456,
-                    InvoiceTypeId = "T",
-                    InvoiceUseTypeId = "03",
-                    InvoicePaymentType = "PPD",
-                    InvoicePaymentMethod = "03",
-                    FtMarkups = new[] { 100.50, 200.50, 300.50 },
-                    InvoiceLines = new[] { "Concepto-P01", "Concepto-P02" },
-                    InvoiceAmounts = new[] { 1000.79, 2000.79, 3000.79 }
-                };
-                var cost = new Cost { Total = 1000, PrimaryTaxAmount = 160 };
-                var provider = "Another Test";
-                var PNR = new string('a', 10);
-                var hotels = new Hotel[] { 
-                    new Hotel { 
-                        Amount = 123.50, 
-                        Name = "Hilton",
-                        Currency = "USD", 
-                        ConfirmationNumber = "123456789", 
-                    } 
-                };
+                var apiRequest = SetTestData();
 
                 try
                 {
                     var publicIpAddress = await NetworkHelper.GetPublicIpAddress();
                     Console.WriteLine($"Public IP request {publicIpAddress}");
-                    await RestClientService.SendRequest(passengers, cost, provider, PNR, a14ft, hotels);
+                    await RestClientService.SendRequest(apiRequest);
                     Console.WriteLine("API request success");
                 }
                 catch(HttpRequestException ex)

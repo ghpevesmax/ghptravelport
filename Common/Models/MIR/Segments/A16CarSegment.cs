@@ -2,15 +2,15 @@
 
 namespace Common.Models
 {
-    public class A16HotelSegment : BaseSegment
+    public class A16CarSegment : BaseSegment
     {
-        public A16HotelSegment()
+        public A16CarSegment()
         {
-            Type = SegmentType.A16Hotel;
+            Type = SegmentType.A16Car;
         }
         public string A16SEC { get; set; }
         public string A16TYP { get; set; }
-        public string A16NME { get; set; }
+        public string A16CAR { get; set; }
         public string A16OD { get; set; }
         public string A16OD_A16RG { get; set; }
         public string A16CF { get; set; }

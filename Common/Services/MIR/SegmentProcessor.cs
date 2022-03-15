@@ -56,9 +56,13 @@ namespace Common.Services
                                          segmentInstance = new FareValueSegment();
                                          segmentTypeDefinition = typeof(FareValueFieldDefinition);
                                          break;
-                case SegmentType.A16HotelRoomMaster: 
+                case SegmentType.A16Hotel: 
                                          segmentInstance = new A16HotelSegment();
                                          segmentTypeDefinition = typeof(HotelFieldDefinition);
+                                         break;
+                case SegmentType.A16Car: 
+                                         segmentInstance = new A16CarSegment();
+                                         segmentTypeDefinition = typeof(CarFieldDefinition);
                                          break;
                 default: return null;
             }
@@ -128,8 +132,16 @@ namespace Common.Services
 
                                 if (!complexField.IsNullOrEmpty())
                                 {
-                                    segmentPropValue = complexField
+                                    complexField = complexField
                                         .Replace(fieldDefinition.CodeId, string.Empty);
+                                    
+                                    if (fieldDefinition.IsNestedDelimitatorDriven)
+                                    {
+                                        complexField = complexField.Split(fieldDefinition.NestedDelimitator).First();
+                                        complexField = complexField.Substring(0, complexField.Length - fieldDefinition.CropIndex);
+                                    }
+
+                                    segmentPropValue = complexField;
                                     break;
                                 }
                             }
@@ -187,34 +199,39 @@ namespace Common.Services
         public static SegmentType GetSegmentType(string line)
         {
             SegmentType segmentType = SegmentType.None;
-            if (line.StartsWith("T5"))
+            if (line.StartsWith(SegmentIdentifier.Header))
             {
                 segmentType = SegmentType.Header;
             }
 
-            if (line.StartsWith("A00"))
+            if (line.StartsWith(SegmentIdentifier.CustomerRemarks))
             {
                 segmentType = SegmentType.CustomerRemarks;
             }
 
-            if (line.StartsWith("A02"))
+            if (line.StartsWith(SegmentIdentifier.Passenger))
             {
                 segmentType = SegmentType.Passenger;
             }
 
-            if (line.StartsWith("A07"))
+            if (line.StartsWith(SegmentIdentifier.FareValue))
             {
                 segmentType = SegmentType.FareValue;
             }
 
-            if (line.StartsWith("A14FT"))
+            if (line.StartsWith(SegmentIdentifier.A14FT))
             {
                 segmentType = SegmentType.A14FT;
             }
 
-            if (line.StartsWith("A16A"))
+            if (line.StartsWith(SegmentIdentifier.A16Hotel))
             {
-                segmentType = SegmentType.A16HotelRoomMaster;
+                segmentType = SegmentType.A16Hotel;
+            }
+
+            if (line.StartsWith(SegmentIdentifier.A16Car))
+            {
+                segmentType = SegmentType.A16Car;
             }
 
             return segmentType;

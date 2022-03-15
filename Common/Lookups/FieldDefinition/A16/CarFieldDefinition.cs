@@ -4,9 +4,9 @@ using System;
 namespace Common.Lookups
 {
     /// <summary>
-    /// Represents the A16 Customer remark section
+    /// Represents the A00 Customer remark section
     /// </summary>
-    public static class HotelFieldDefinition
+    public static class CarFieldDefinition
     {
         public static FieldDefinition A16SEC =>
             new()
@@ -22,12 +22,12 @@ namespace Common.Lookups
                 SegmentPosition = 3,
                 Length = 1,
             };
-        public static FieldDefinition A16NME =>
+        public static FieldDefinition A16CAR =>
             new()
             {
-                Name = "A16NME",
-                SegmentPosition = 36,
-                Length = 20,
+                Name = "A16CAR",
+                SegmentPosition = 13,
+                Length = 12,
             };
         public static FieldDefinition A16OD =>
             new()
@@ -35,11 +35,15 @@ namespace Common.Lookups
                 Name = "A16OD",
                 IsOptionalField = true,
                 CodeId = "OD-",
-                SegmentPosition = 120,
+                SegmentPosition = 139,
                 Length = 3,
                 NestedFields = new FieldDefinition[]
                 {
-                    new(){ Name = "A16RG", IsOptionalField = true, CodeId = "RG-", Delimitator = "/" },
+                    new(){ Name = "A16RG", IsOptionalField = true,
+                        CodeId = "RG-", Delimitator = "/",
+                        NestedDelimitator = "-",
+                        CropIndex = 2
+                    }
                 }
             };
         public static FieldDefinition A16CF =>
@@ -50,6 +54,5 @@ namespace Common.Lookups
                 CodeId = "CF:",
                 SegmentPosition = 2,
             };
-        public static int CarriageReturnNumber => 2;
     }
 }
