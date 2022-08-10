@@ -2,6 +2,7 @@
 using Common.Lookups;
 using Common.Models;
 using Common.Services;
+using Common.Utils;
 using Refit;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,11 @@ using TextCopy;
 
 namespace ConsoleApp
 {
-    class Program
+    static class Program
     {
-        public static string FileName => @"C:\Users\Laelo\OneDrive\Documentos\Development\DesarrollosInformativos\Travelport\R4\2 Adt aereo hotel y auto.MIR";
-        //public static string FileName => @"C:\Users\Laelo\OneDrive\Documentos\Development\DesarrollosInformativos\Travelport\R4\1 Pax 1 segmento.MIR";
-        public static bool IsApiTest => true;
-        public static SegmentType? SegmentTypeTest => SegmentType.A16Car;
+        public static string FileName => @"C:\Users\User\Documentos\Travelport\R5\Ejemplo-con-remarks.MIR";
+        public static bool IsApiTest => false;
+        public static SegmentType? SegmentTypeTest => null;
 
         private static ApiReservationDetailsRequest SetTestData()
         {
@@ -32,7 +32,7 @@ namespace ConsoleApp
                 InvoiceUseTypeId = "03",
                 InvoicePaymentType = "PPD",
                 InvoicePaymentMethod = "03",
-                FtMarkups = new[] { 100.50, 200.50, 300.50 },
+                Markups = new[] { 100.50, 200.50, 300.50 },
                 InvoiceLines = new[] { "Concepto-P01", "Concepto-P02" },
                 InvoiceAmounts = new[] { 1000.79, 2000.79, 3000.79 }
             };
@@ -56,9 +56,31 @@ namespace ConsoleApp
                     }
                 };
 
-            var apiRequest = MapperService.MapToApi(passengers, cost, provider, PNR, a14ft);
-            apiRequest.Hotels = hotels;
-            apiRequest.Cars = cars;
+            var apiRequest = MapperService.MapToApi(passengers, cost, provider, PNR, a14ft, cars, hotels);
+            return apiRequest;
+        }
+
+        private static ApiReservationDetailsRequest SetTestData(List<BaseSegment> mirSegments)
+        {
+            var passengerSegments = mirSegments.All(SegmentType.Passenger)
+                            .Select(_ => _ as PassengerSegment);
+            var hotelSegments = mirSegments.All(SegmentType.A16Hotel)
+                .Select(_ => _ as A16HotelSegment);
+            var carSegments = mirSegments.All(SegmentType.A16Car)
+                .Select(_ => _ as A16CarSegment);
+            var a14FTSegment = mirSegments.First(SegmentType.A14FT) as A14FTSegment;
+            var headerSegment = mirSegments.First(SegmentType.Header) as HeaderSegment;
+            var taxSegment = mirSegments.First(SegmentType.FareValue) as FareValueSegment;
+
+            var a14FT = new A14FT(a14FTSegment);
+            var PNR = headerSegment.T50RCL.Trim();
+            var provider = headerSegment.T50ISS.Trim();
+            var cost = MapperService.MapFromSegment(taxSegment);
+            var cars = carSegments.Select(MapperService.MapFromSegment);
+            var hotels = hotelSegments.Select(MapperService.MapFromSegment);
+            var passengers = MapperService.MapFromSegment(passengerSegments);
+
+            var apiRequest = MapperService.MapToApi(passengers, cost, provider, PNR, a14FT, cars, hotels);
             return apiRequest;
         }
 
@@ -66,59 +88,69 @@ namespace ConsoleApp
         static async Task Main(string[] args)
         {
             Console.WriteLine(Environment.CurrentDirectory);
+
+            var lines = FileHelper.GetLinesFromFile(FileName);
+            var segmentList = FileProcessor.BuildFileSegments(lines);
+            var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
+            var clipboard = new StringBuilder();
+
+            if (SegmentTypeTest.HasValue)
+            {
+                MIRSegments = MIRSegments
+                    .Where(_ => _ != null && _.Type == SegmentTypeTest)
+                    .ToList();
+            }
+
+            foreach (var segment in MIRSegments)
+            {
+                clipboard.AppendLine(segment.ToString());
+                Console.Write(segment.ToString());
+            }
+            ClipboardService.SetText(clipboard.ToString());
+
+            ApiReservationDetailsRequest apiRequest;
+
             if (IsApiTest)
             {
-                var apiRequest = SetTestData();
-
-                try
-                {
-                    var publicIpAddress = await NetworkHelper.GetPublicIpAddress();
-                    Console.WriteLine($"Public IP request {publicIpAddress}");
-                    await RestClientService.SendRequest(apiRequest);
-                    Console.WriteLine("API request success");
-                }
-                catch(HttpRequestException ex)
-                {
-                    Console.WriteLine($"Could not connect to service on { RestClientService.ServiceUrl }");
-                    Console.WriteLine("Original exception:\n\n" + ex);
-
-                }
-                catch (ApiException ex)
-                {
-                    Console.WriteLine("API request failed");
-                    if(!new System.Net.HttpStatusCode[] { System.Net.HttpStatusCode.NotFound, System.Net.HttpStatusCode.Unauthorized }.Contains(ex.StatusCode))
-                    {
-                        // Extract the details of the error
-                        var errors = await ex.GetContentAsAsync<Dictionary<string, string>>();
-                        // Combine the errors into a string
-                        var message = string.Join("; ", errors.Values);
-                        // Throw a normal exception
-                        //throw new Exception(message);
-                        Console.WriteLine("Message:\n" + message);
-                    }
-                    Console.WriteLine("Original exception:\n" + ex);
-                }
+                apiRequest = SetTestData(); 
             }
             else
             {
-                var lines = FileHelper.GetLinesFromFile(FileName);
-                var segmentList = FileProcessor.BuildFileSegments(lines);
-                var MIRSegments = SegmentProcessor.GenerateAllSegments(segmentList);
-                var clipboard = new StringBuilder();
+                apiRequest = SetTestData(MIRSegments);
+            }
 
-                if(SegmentTypeTest.HasValue)
-                {
-                    MIRSegments = MIRSegments
-                        .Where(_ => _ != null && _.Type == SegmentTypeTest)
-                        .ToList();
-                }
+            try
+            {
+                var publicIpAddress = await NetworkHelper.GetPublicIpAddress();
+                Console.WriteLine($"Public IP request {publicIpAddress}");
+                await RestClientService.SendRequest(apiRequest);
+                Console.WriteLine("API request success");
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"Could not connect to service on {RestClientService.ServiceUrl}");
+                Console.WriteLine("Original exception:\n\n" + ex);
 
-                foreach (var segment in MIRSegments)
+            }
+            catch (ApiException ex)
+            {
+                Console.WriteLine("API request failed");
+                if (!new System.Net.HttpStatusCode[] { System.Net.HttpStatusCode.NotFound, System.Net.HttpStatusCode.Unauthorized }.Contains(ex.StatusCode))
                 {
-                    clipboard.AppendLine(segment.ToString());
-                    Console.Write(segment.ToString());
+                    string message = string.Empty;
+                    // Extract the details of the error
+                    try
+                    {
+                        var errors = await ex.GetContentAsAsync<Dictionary<string, string>>();
+                        message = string.Join("; ", errors.Values);
+                    }
+                    catch (Exception)
+                    {
+                        message = ex.Content;
+                    }
+                    Console.WriteLine("Message:\n" + message);
                 }
-                ClipboardService.SetText(clipboard.ToString());
+                Console.WriteLine("Original exception:\n" + ex);
             }
             Console.ReadLine();
         }

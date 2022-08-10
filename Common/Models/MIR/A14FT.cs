@@ -55,16 +55,16 @@ namespace Common.Models
                         .ToArray();
                 }
 
-                if (segment.FtMarkups?.Any() == true)
+                if (segment.Markups?.Any() == true)
                 {
-                    FtMarkups = segment.FtMarkups
+                    Markups = segment.Markups
                         .Select(_ => Convert.ToDouble(_.Trim()))
                         .ToArray();
                 }
             }
         }
         public int ClientId { get; set; }
-        public double[] FtMarkups { get; set; } = Array.Empty<double>();
+        public double[] Markups { get; set; } = Array.Empty<double>();
         public string[] InvoiceLines { get; set; } = Array.Empty<string>();
         public double[] InvoiceAmounts { get; set; } = Array.Empty<double>();
         public string InvoicePaymentMethod { get; set; }

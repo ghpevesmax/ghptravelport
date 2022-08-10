@@ -120,9 +120,7 @@ namespace Common.Watchers
                         try
                         {
                             var apiRequest = MapperService
-                                    .MapToApi(passengers, cost, provider, PNR, a14FT);
-                                apiRequest.Cars = cars.ToArray();
-                                apiRequest.Hotels = hotels.ToArray();
+                                    .MapToApi(passengers, cost, provider, PNR, a14FT, cars, hotels);
 
                             await RestClientService.SendRequest(apiRequest);
                             FileHelper.MoveFileToProcessed(sourceFileFullName);

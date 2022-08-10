@@ -198,7 +198,8 @@ namespace Common.Services
 
         public static SegmentType GetSegmentType(string line)
         {
-            SegmentType segmentType = SegmentType.None;
+            var segmentType = SegmentType.None;
+
             if (line.StartsWith(SegmentIdentifier.Header))
             {
                 segmentType = SegmentType.Header;

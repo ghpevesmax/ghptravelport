@@ -77,11 +77,12 @@ namespace Common.Services
             }).ToArray();
         }
 
-        public static ApiReservationDetailsRequest MapToApi(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, A14FT a14FT)
+        public static ApiReservationDetailsRequest MapToApi(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, 
+            A14FT a14FT, IEnumerable<Car> cars, IEnumerable<Hotel> hotels)
         {
             var apiPassengers = MapToApi(passengers);
             var apiInvoiceLines = MapToApi(a14FT.InvoiceLines);
-            var apiFtMarkups = MapToApiFtMarkup(a14FT.FtMarkups);
+            var apiMarkups = MapToApiMarkup(a14FT.Markups);
             var apiInvoiceAmounts = MapToApiInvoiceAmount(a14FT.InvoiceAmounts);
 
             return new ApiReservationDetailsRequest
@@ -90,7 +91,7 @@ namespace Common.Services
                 Total = cost.Total,
                 UserId = a14FT.UserId,
                 ProviderName = provider,
-                FtMarkups = apiFtMarkups,
+                FtMarkups = apiMarkups,
                 ClientId = a14FT.ClientId,
                 Passengers = apiPassengers,
                 IVA = cost.PrimaryTaxAmount,
@@ -100,7 +101,9 @@ namespace Common.Services
                 InvoicePayment = a14FT.InvoicePaymentType,
                 InvoiceUseTypeId = a14FT.InvoiceUseTypeId,
                 InvoicePaymentMethod = a14FT.InvoicePaymentMethod,
-            };
+                Cars = cars.ToArray(),
+                Hotels = hotels.ToArray()
+        };
         }
 
         public static ApiInvoiceAmount[] MapToApiInvoiceAmount(double[] amounts)
@@ -110,69 +113,66 @@ namespace Common.Services
                 .ToArray();
         }
 
-        public static ApiFtMarkup[] MapToApiFtMarkup(double[] amounts)
+        public static ApiMarkup[] MapToApiMarkup(double[] amounts)
         {
             return amounts
-                .Select(_ => new ApiFtMarkup { Amount = _ })
+                .Select(_ => new ApiMarkup { Amount = _ })
                 .ToArray();
         }
 
         public static void MapToSegment(A14FTSegment segment, RawSegment rawSegment)
         {
-            var a14ftValue = rawSegment.SegmentString
-                .Replace("A14FT-", string.Empty);
+            var a14ft = rawSegment.SegmentString
+                .Replace("A14FT-", string.Empty)
+                .Replace("a14FT-", string.Empty);
 
-            if (a14ftValue.StartsWith("IdCliente-"))
+            var keyDelimIndex = a14ft.IndexOf('-');
+            var a14FtKey = a14ft[..keyDelimIndex].ToUpper();
+            var a14FtValue = a14ft[(keyDelimIndex + 1)..];
+
+            if (a14FtKey.StartsWith(A14FTSegment.ClientIdKey))
             {
-                segment.ClientId = a14ftValue.Replace("IdCliente-", string.Empty);
+                segment.ClientId = a14FtValue;
             }
 
-            if (a14ftValue.StartsWith("IdUsuario-"))
+            if (a14FtKey.StartsWith(A14FTSegment.UserIdKey))
             {
-                segment.UserId = a14ftValue.Replace("IdUsuario-", string.Empty);
+                segment.UserId = a14FtValue;
             }
 
-            if (a14ftValue.StartsWith("FormaPago-"))
+            if (a14FtKey.StartsWith(A14FTSegment.InvoicePaymentMethodKey))
             {
-                segment.InvoicePaymentMethod = a14ftValue.Replace("FormaPago-", string.Empty);
+                segment.InvoicePaymentMethod = a14FtValue;
             }
 
-            if (a14ftValue.StartsWith("MetodoPago-"))
+            if (a14FtKey.StartsWith(A14FTSegment.InvoicePaymentTypeKey))
             {
-                segment.InvoicePaymentType = a14ftValue.Replace("MetodoPago-", string.Empty);
+                segment.InvoicePaymentType = a14FtValue;
             }
 
-            if (a14ftValue.StartsWith("TipoDocumento-"))
+            if (a14FtKey.StartsWith(A14FTSegment.InvoiceTypeIdKey))
             {
-                segment.InvoiceTypeId = a14ftValue.Replace("TipoDocumento-", string.Empty);
+                segment.InvoiceTypeId = a14FtValue;
             }
 
-            if (a14ftValue.StartsWith("UsoCFDI-"))
+            if (a14FtKey.StartsWith(A14FTSegment.InvoiceUseTypeIdKey))
             {
-                segment.InvoiceUseTypeId = a14ftValue.Replace("UsoCFDI-", string.Empty);
+                segment.InvoiceUseTypeId = a14FtValue;
             }
 
-            if (a14ftValue.StartsWith("TipoDocumento-"))
+            if (a14FtKey.StartsWith(A14FTSegment.InvoiceServiceAmountKey))
             {
-                segment.InvoiceTypeId = a14ftValue.Replace("TipoDocumento-", string.Empty);
+                segment.InvoiceServiceAmounts.Add(a14FtValue);
             }
 
-            if (a14ftValue.StartsWith("CargoServicio-"))
+            if (a14FtKey.StartsWith(A14FTSegment.InvoiceLineKey))
             {
-                var cargo = a14ftValue.Replace("CargoServicio-", string.Empty);
-                segment.InvoiceServiceAmounts.Add(cargo);
+                segment.InvoiceLines.Add(a14FtValue);
             }
 
-            if (a14ftValue.StartsWith("Concepto-"))
+            if (a14FtKey.StartsWith(A14FTSegment.MarkupKey))
             {
-                var concepto = a14ftValue.Replace("Concepto-", string.Empty);
-                segment.InvoiceLines.Add(concepto);
-            }
-
-            if (a14ftValue.StartsWith("FtMarkup-"))
-            {
-                var ftMarkup = a14ftValue.Replace("FtMarkup-", string.Empty);
-                segment.FtMarkups.Add(ftMarkup);
+                segment.Markups.Add(a14FtValue);
             }
         }
 
@@ -184,7 +184,7 @@ namespace Common.Services
             segment.InvoiceServiceAmounts = segment.InvoiceServiceAmounts
                 .OrderSplit("-");
 
-            segment.FtMarkups = segment.FtMarkups
+            segment.Markups = segment.Markups
                 .OrderSplit("-");
         }
     }
