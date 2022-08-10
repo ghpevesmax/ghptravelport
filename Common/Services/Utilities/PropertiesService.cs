@@ -8,7 +8,7 @@ using Common.Models;
 
 namespace Common.Services
 {
-    public class PropertiesService
+    public static class PropertiesService
     {
         /// <summary>
         /// Gets a list of properties from an object

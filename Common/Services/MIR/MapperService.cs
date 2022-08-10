@@ -77,7 +77,8 @@ namespace Common.Services
             }).ToArray();
         }
 
-        public static ApiReservationDetailsRequest MapToApi(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, A14FT a14FT)
+        public static ApiReservationDetailsRequest MapToApi(IEnumerable<Passenger> passengers, Cost cost, string provider, string PNR, 
+            A14FT a14FT, IEnumerable<Car> cars, IEnumerable<Hotel> hotels)
         {
             var apiPassengers = MapToApi(passengers);
             var apiInvoiceLines = MapToApi(a14FT.InvoiceLines);
@@ -100,7 +101,9 @@ namespace Common.Services
                 InvoicePayment = a14FT.InvoicePaymentType,
                 InvoiceUseTypeId = a14FT.InvoiceUseTypeId,
                 InvoicePaymentMethod = a14FT.InvoicePaymentMethod,
-            };
+                Cars = cars.ToArray(),
+                Hotels = hotels.ToArray()
+        };
         }
 
         public static ApiInvoiceAmount[] MapToApiInvoiceAmount(double[] amounts)

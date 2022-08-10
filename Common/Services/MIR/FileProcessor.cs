@@ -8,7 +8,7 @@ using Common.Utils;
 
 namespace Common.Services
 {
-    public class FileProcessor
+    public static class FileProcessor
     {
         public static List<RawSegment> BuildFileSegments(IEnumerable<string> lines)
         {
