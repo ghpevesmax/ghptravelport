@@ -14,8 +14,8 @@ namespace Common.Services
 {
     public static class RestClientService
     {
-        //public static readonly string ServiceUrl = "http://apitravel.miagenciaghp.com/api";
-        public static readonly string ServiceUrl = "http://localhost:8000/api";
+        public static readonly string ServiceUrl = "http://apitravel.miagenciaghp.com/api";
+        //public static readonly string ServiceUrl = "http://localhost:8000/api";
 
         public static async Task SendRequest(ApiReservationDetailsRequest request)
         {

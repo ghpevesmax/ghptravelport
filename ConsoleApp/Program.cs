@@ -32,7 +32,7 @@ namespace ConsoleApp
                 InvoiceUseTypeId = "03",
                 InvoicePaymentType = "PPD",
                 InvoicePaymentMethod = "03",
-                FtMarkups = new[] { 100.50, 200.50, 300.50 },
+                Markups = new[] { 100.50, 200.50, 300.50 },
                 InvoiceLines = new[] { "Concepto-P01", "Concepto-P02" },
                 InvoiceAmounts = new[] { 1000.79, 2000.79, 3000.79 }
             };

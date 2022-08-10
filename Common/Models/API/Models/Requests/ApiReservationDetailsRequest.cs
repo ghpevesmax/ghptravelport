@@ -37,7 +37,7 @@ namespace Common.Models
 
         public Car[] Cars { get; set; } = Array.Empty<Car>();
         public Hotel[] Hotels { get; set; } = Array.Empty<Hotel>();
-        public ApiFtMarkup[] FtMarkups { get; set; } = Array.Empty<ApiFtMarkup>();
+        public ApiMarkup[] FtMarkups { get; set; } = Array.Empty<ApiMarkup>();
         public ApiPassenger[] Passengers { get; set; } = Array.Empty<ApiPassenger>();
         public ApiInvoiceLine[] InvoiceLines { get; set; } = Array.Empty<ApiInvoiceLine>();
         public ApiInvoiceAmount[] InvoiceAmounts { get; set; } = Array.Empty<ApiInvoiceAmount>();
@@ -62,7 +62,7 @@ namespace Common.Models
         public string Line { get; set; }
     }
 
-    public class ApiFtMarkup
+    public class ApiMarkup
     {
         public double Amount { get; set; }
     }
